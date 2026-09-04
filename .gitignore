@@ -1,0 +1,43 @@
+# Entornos virtuales
+venv/
+.venv/
+env/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Datos del dataset
+data/raw/
+data/processed/
+
+# Archivos temporales
+*.tmp
+*.temp
+*.log
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Editores
+.vscode/
+.idea/
+
+# Variables de entorno
+.env
+.env.*
+
+# Archivos de entrenamiento temporales
+checkpoints/
+runs/
+
+# Archivos grandes generados durante experimentos
+*.h5
+*.ckpt
