@@ -13,7 +13,7 @@
 3. **Construir una red neuronal** capaz de comparar dos imágenes.
 4. **Entrenar y evaluar diferentes versiones del modelo** utilizando métricas de clasificación.
 5. **Aplicar un ciclo de mejora** a partir de los resultados obtenidos.
-6. **Guardar el modelo entrenado** para utilizarlo posteriormente en una aplicación.
+6. **Guardar el modelo entrenado** para integrarlo en una aplicación.
 7. **Desarrollar una aplicación** que permita cargar dos fotografías y obtener una predicción.
 8. **Adaptar progresivamente el sistema al contexto de Bolívar**.
 
@@ -34,6 +34,7 @@ El proyecto utiliza una arquitectura de tipo **Siamese Network**, orientada a co
 - Pandas
 - Scikit-learn
 - Matplotlib
+- Gradio
 - Google Colab
 - Visual Studio Code
 - Git
@@ -371,7 +372,7 @@ Visual Studio Code se utiliza para:
 - Desarrollo del código.
 - Documentación.
 - Integración del modelo.
-- Desarrollo de la futura aplicación.
+- Desarrollo de la interfaz de la comparación.
 - Gestión del repositorio Git.
 
 ---
@@ -449,6 +450,7 @@ NumPy
 Pandas
 Scikit-learn
 Matplotlib
+Gradio
 ```
 
 ---
@@ -481,70 +483,7 @@ Exportación del modelo
 
 ---
 
-# 🤖 Trabajo con Agentes
-
-El proyecto incluye archivos de configuración y documentación para facilitar el trabajo de agentes de inteligencia artificial.
-
-```text
-AGENT.md
-memoria.md
-comandos.md
-Skill.md
-```
-
-Estos archivos permiten documentar:
-
-- Contexto del proyecto.
-- Objetivos.
-- Comandos de ejecución.
-- Estructura del repositorio.
-- Procedimientos de trabajo.
-- Habilidades y tareas disponibles para el agente.
-
----
-
-# 📌 Estado Actual del Proyecto
-
-## ✅ Completado
-
-- [x] Definición del problema.
-- [x] Selección del dataset.
-- [x] Descarga del dataset.
-- [x] Validación del dataset.
-- [x] Extracción del dataset.
-- [x] Exploración de imágenes.
-- [x] Preparación de los datos.
-- [x] Creación de pares positivos y negativos.
-- [x] Construcción de una CNN inicial.
-- [x] Evaluación de la primera versión.
-- [x] Implementación de MobileNetV2.
-- [x] Aumento del conjunto experimental.
-- [x] Fine-tuning.
-- [x] Evaluación del modelo final.
-- [x] Exportación del modelo.
-- [x] Creación del repositorio GitHub.
-- [x] Creación de la estructura base del proyecto.
-- [x] Incorporación del modelo entrenado al repositorio.
-
-## 🚧 Pendiente
-
-- [ ] Crear la interfaz de usuario.
-- [ ] Permitir cargar dos fotografías.
-- [ ] Procesar ambas imágenes mediante el modelo.
-- [ ] Mostrar el resultado de la comparación.
-- [ ] Realizar pruebas con fotografías externas al dataset.
-- [ ] Mejorar el rendimiento del modelo.
-- [ ] Incorporar nuevos datos de entrenamiento.
-- [ ] Realizar nuevas iteraciones del feedback loop.
-- [ ] Adaptar el sistema al contexto específico de Bolívar.
-
----
-
-# 🎯 Próximo Objetivo
-
-El próximo objetivo es integrar el modelo entrenado en una aplicación capaz de recibir dos fotografías y realizar automáticamente la comparación.
-
-## Flujo esperado
+## Flujo de la aplicación
 
 ```text
 📷 Subir imagen 1
