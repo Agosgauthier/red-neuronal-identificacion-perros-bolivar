@@ -355,7 +355,7 @@ modelo_perros_bolivar_final.keras
 Ubicación dentro del repositorio:
 
 ```text
-modelo/modelo_perros_bolivar_final.keras
+model/modelo_perros_bolivar_final.keras
 ```
 
 Tamaño aproximado:
@@ -409,7 +409,7 @@ Matplotlib
 ```text
 red-neuronal-identificacion-perros-bolivar/
 │
-├── modelo/
+├── model/
 │   └── modelo_perros_bolivar_final.keras
 │
 ├── data/

@@ -362,7 +362,7 @@ git log --oneline
 ```text
 red-neuronal-identificacion-perros-bolivar/
 │
-├── modelo/
+├── model/
 │   └── modelo_perros_bolivar_final.keras
 │
 ├── data/
@@ -451,7 +451,7 @@ Antes de ejecutar un comando destructivo, debe comprobar primero el estado del p
 Modelo actual:
 
 ```text
-modelo/modelo_perros_bolivar_final.keras
+model/modelo_perros_bolivar_final.keras
 ```
 
 Resultado:

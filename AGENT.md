@@ -110,7 +110,7 @@ F1-score: 72,09 %
 El modelo se encuentra en:
 
 ```text
-modelo/modelo_perros_bolivar_final.keras
+model/modelo_perros_bolivar_final.keras
 ```
 
 ---
@@ -175,7 +175,7 @@ Visual Studio Code se utiliza para:
 ```text
 red-neuronal-identificacion-perros-bolivar/
 │
-├── modelo/
+├── model/
 │   └── modelo_perros_bolivar_final.keras
 │
 ├── data/
@@ -263,7 +263,7 @@ No se debe asumir que una modificación mejora el modelo sin comprobarlo mediant
 El modelo entrenado debe mantenerse en:
 
 ```text
-modelo/modelo_perros_bolivar_final.keras
+model/modelo_perros_bolivar_final.keras
 ```
 
 Cuando se genere una nueva versión del modelo, se debe:

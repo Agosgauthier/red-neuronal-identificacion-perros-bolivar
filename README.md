@@ -329,7 +329,7 @@ F1-score: 72,09 %
 El modelo final se encuentra almacenado en:
 
 ```text
-modelo/modelo_perros_bolivar_final.keras
+model/modelo_perros_bolivar_final.keras
 ```
 
 Formato utilizado:
@@ -406,7 +406,7 @@ Permitir que un agente pueda:
 ```text
 red-neuronal-identificacion-perros-bolivar/
 │
-├── 📂 modelo/
+├── 📂 model/
 │   └── 📄 modelo_perros_bolivar_final.keras
 │
 ├── 📂 data/

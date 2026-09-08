@@ -299,7 +299,7 @@ Mejora aparente
 El modelo actual se encuentra en:
 
 ```text
-modelo/modelo_perros_bolivar_final.keras
+model/modelo_perros_bolivar_final.keras
 ```
 
 ### Procedimiento recomendado
@@ -467,7 +467,7 @@ Actualmente el proyecto dispone de:
 Modelo actual:
 
 ```text
-modelo/modelo_perros_bolivar_final.keras
+model/modelo_perros_bolivar_final.keras
 ```
 
 Resultado:
