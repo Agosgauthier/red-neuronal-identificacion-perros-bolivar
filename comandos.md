@@ -13,13 +13,13 @@ Los comandos están organizados según las tareas de configuración, ejecución,
 ## Crear entorno virtual
 
 ```bash
-python -m venv venv
+python -m venv .venv
 ```
 
-## Activar entorno virtual en Windows
+## Activar entorno virtual en Windows - Git Bash
 
 ```bash
-venv\Scripts\activate
+source .venv/Scripts/activate
 ```
 
 ## Actualizar pip
@@ -300,6 +300,36 @@ files.download(
     "modelo_perros_bolivar_final.keras"
 )
 ```
+---
+# 🚀 Ejecución de la Aplicación
+
+## Ejecutar la aplicación
+
+Con el entorno virtual activado:
+
+```bash
+python src/app.py
+```
+
+La aplicación estará disponible en:
+
+```text
+http://127.0.0.1:7860
+```
+
+Para detener la aplicación:
+
+```text
+Ctrl + C
+```
+
+## Ejecutar las pruebas
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+Las pruebas verifican el procesamiento de imágenes y el comportamiento cuando no se cargan las dos imágenes.
 
 ---
 
@@ -443,52 +473,3 @@ El agente puede utilizar este archivo como referencia para ejecutar tareas relac
 - Git y GitHub.
 
 Antes de ejecutar un comando destructivo, debe comprobar primero el estado del proyecto.
-
----
-
-# 📌 Último Estado Conocido
-
-Modelo actual:
-
-```text
-model/modelo_perros_bolivar_final.keras
-```
-
-Resultado:
-
-```text
-Accuracy: 72,13 %
-Precision: 72,18 %
-Recall: 72,00 %
-F1-score: 72,09 %
-```
-
-Conjunto experimental:
-
-```text
-100 perros → entrenamiento
-20 perros  → prueba
-
-4.000 pares → entrenamiento
-800 pares   → prueba
-```
-
----
-
-# 🚀 Próxima Etapa
-
-La siguiente etapa consiste en integrar el modelo entrenado en una aplicación que permita:
-
-```text
-Subir imagen 1
-      +
-Subir imagen 2
-      ↓
-Procesamiento
-      ↓
-Modelo
-      ↓
-Comparación
-      ↓
-Mismo perro / Perros diferentes
-```
