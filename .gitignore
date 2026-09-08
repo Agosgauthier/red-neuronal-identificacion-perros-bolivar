@@ -14,8 +14,10 @@ __pycache__/
 .ipynb_checkpoints/
 
 # Datos del dataset
-data/raw/
-data/processed/
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
 
 # Archivos temporales
 *.tmp
