@@ -319,20 +319,6 @@ El agente no debe:
 
 ---
 
-# 🚀 Próximas Tareas
-
-Las siguientes tareas previstas para el proyecto son:
-
-1. Integrar el modelo en una aplicación.
-2. Permitir cargar dos fotografías.
-3. Procesar las imágenes mediante el modelo.
-4. Mostrar el resultado de la comparación.
-5. Realizar pruebas con imágenes externas al dataset.
-6. Continuar mejorando el rendimiento del modelo.
-7. Adaptar el sistema progresivamente al contexto de Bolívar.
-
----
-
 # 📌 Regla Principal
 
 El agente debe priorizar siempre:
