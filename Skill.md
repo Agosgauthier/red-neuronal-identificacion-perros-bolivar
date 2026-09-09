@@ -417,6 +417,42 @@ Cuando se realice un cambio importante en el modelo o en el flujo de trabajo, de
 
 ---
 
+# 🖥️ Aplicación y Pruebas
+
+El agente puede trabajar con la aplicación de comparación de perros y ejecutar las pruebas automatizadas del proyecto.
+
+## Aplicación
+
+Archivo principal:
+
+```text
+src/app.py
+```
+
+Para ejecutar la aplicación:
+
+```bash
+python src/app.py
+```
+
+## Pruebas
+
+Las pruebas se encuentran en:
+
+```text
+tests/test_app.py
+```
+
+Para ejecutarlas:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+El agente debe comprobar que las pruebas continúen funcionando después de realizar modificaciones relacionadas con la aplicación.
+
+---
+
 # 🚫 Restricciones
 
 El agente no debe:
@@ -429,74 +465,3 @@ El agente no debe:
 - Ignorar errores de ejecución.
 - Considerar una mejora sin realizar una evaluación.
 - Modificar archivos no relacionados con la tarea.
-
----
-
-# 🎯 Habilidades Futuras
-
-El agente podrá ampliar sus capacidades para:
-
-- Automatizar experimentos.
-- Generar nuevos conjuntos de pares.
-- Comparar diferentes arquitecturas.
-- Ajustar hiperparámetros.
-- Analizar errores específicos.
-- Automatizar evaluaciones.
-- Integrar el modelo en la aplicación.
-- Proponer mejoras basadas en los resultados.
-
----
-
-# 📌 Estado Actual
-
-Actualmente el proyecto dispone de:
-
-```text
-✅ Dataset YT-BB-Dog
-✅ Preparación de imágenes
-✅ Generación de pares
-✅ Siamese Network
-✅ MobileNetV2
-✅ Transfer Learning
-✅ Fine-tuning
-✅ Evaluación
-✅ Modelo entrenado
-✅ Modelo exportado
-```
-
-Modelo actual:
-
-```text
-model/modelo_perros_bolivar_final.keras
-```
-
-Resultado:
-
-```text
-Accuracy: 72,13 %
-Precision: 72,18 %
-Recall: 72,00 %
-F1-score: 72,09 %
-```
-
----
-
-# 🚀 Próxima Habilidad a Implementar
-
-La próxima etapa consiste en integrar el modelo en una aplicación que permita:
-
-```text
-📷 Imagen 1
-      +
-📷 Imagen 2
-      ↓
-🧠 Modelo
-      ↓
-Comparación
-      ↓
-✅ Mismo perro
-      o
-❌ Perros diferentes
-```
-
-El agente deberá asistir en la implementación, pruebas y documentación de esta funcionalidad.
