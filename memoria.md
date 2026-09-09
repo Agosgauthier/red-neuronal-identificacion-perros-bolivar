@@ -492,50 +492,39 @@ Cada nueva versión debe poder compararse con la anterior.
 
 ---
 
-# 🚧 Próximas Tareas
-
-El proyecto debe continuar con:
-
-```text
-1. Crear la interfaz de usuario.
-2. Permitir cargar dos fotografías.
-3. Preprocesar ambas imágenes.
-4. Ejecutar el modelo.
-5. Mostrar el resultado.
-6. Realizar pruebas con imágenes externas.
-7. Mejorar el rendimiento.
-8. Adaptar el sistema al contexto de Bolívar.
-```
-
----
-
 # 📌 Estado Actual
 
+El proyecto cuenta actualmente con:
+
 ```text
-✅ Dataset seleccionado
-✅ Dataset descargado
-✅ Dataset validado
-✅ Datos preparados
-✅ Pares generados
+✅ Dataset YT-BB-Dog seleccionado y preparado
+
+✅ Pares de imágenes generados
+
 ✅ CNN inicial entrenada
-✅ MobileNetV2 implementada
+
+✅ MobileNetV2 implementada mediante transfer learning
+
 ✅ Dataset experimental ampliado
+
 ✅ Fine-tuning realizado
+
 ✅ Modelo evaluado
+
 ✅ Modelo final exportado
+
+✅ Aplicación Gradio implementada
+
+✅ Comparación de dos fotografías funcionando
+
+✅ Pruebas automatizadas implementadas
+
 ✅ Repositorio creado
+
 ✅ Documentación inicial creada
 ```
 
-Pendiente:
-
-```text
-🚧 Integración del modelo en una aplicación
-🚧 Interfaz para cargar imágenes
-🚧 Predicción visual
-🚧 Nuevas pruebas
-🚧 Nuevas mejoras del modelo
-```
+El proyecto se encuentra en una etapa funcional de desarrollo, con el modelo integrado en una aplicación local y con pruebas básicas para verificar su funcionamiento.
 
 ---
 
