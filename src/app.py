@@ -176,12 +176,42 @@ def obtener_probabilidad_mismo(imagen1, imagen2):
     imagen1 = preparar_imagen(imagen1)
     imagen2 = preparar_imagen(imagen2)
 
-    prediccion = modelo_final.predict(
-        [imagen1, imagen2],
-        verbose=0
-    )[0][0]
+    imagen1_espejada = tf.image.flip_left_right(
+        imagen1
+    )
 
-    return float(prediccion)
+    imagen2_espejada = tf.image.flip_left_right(
+        imagen2
+    )
+
+    imagenes_1 = tf.concat(
+        [
+            imagen1,
+            imagen1_espejada,
+            imagen1,
+            imagen1_espejada
+        ],
+        axis=0
+    )
+
+    imagenes_2 = tf.concat(
+        [
+            imagen2,
+            imagen2,
+            imagen2_espejada,
+            imagen2_espejada
+        ],
+        axis=0
+    )
+
+    predicciones = modelo_final.predict(
+        [imagenes_1, imagenes_2],
+        verbose=0
+    ).reshape(-1)
+
+    return float(
+        np.mean(predicciones)
+    )
 
 
 # --------------------------------------------------
