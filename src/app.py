@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 RUTA_MODELO = (
     BASE_DIR
     / "model"
-    / "modelo_perros_bolivar_final.keras"
+    / "modelo_perros_bolivar_12000_app.keras"
 )
 
 RUTA_CANDIDATOS = (

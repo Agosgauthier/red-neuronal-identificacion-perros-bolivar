@@ -43,3 +43,9 @@ runs/
 # Archivos grandes generados durante experimentos
 *.h5
 *.ckpt
+
+# Dataset completo
+dataset/
+
+# Modelos grandes
+*.keras
