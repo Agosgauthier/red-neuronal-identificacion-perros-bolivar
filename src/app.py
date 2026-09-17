@@ -176,43 +176,40 @@ def obtener_probabilidad_mismo(imagen1, imagen2):
     imagen1 = preparar_imagen(imagen1)
     imagen2 = preparar_imagen(imagen2)
 
-    imagen1_espejada = tf.image.flip_left_right(
-        imagen1
+    extractor = modelo_final.get_layer(
+        "extractor_128"
     )
 
-    imagen2_espejada = tf.image.flip_left_right(
-        imagen2
+    vector1 = extractor(
+        imagen1,
+        training=False
+    ).numpy()[0]
+
+    vector2 = extractor(
+        imagen2,
+        training=False
+    ).numpy()[0]
+
+    norma1 = np.linalg.norm(vector1)
+    norma2 = np.linalg.norm(vector2)
+
+    if norma1 == 0 or norma2 == 0:
+        return 0.0
+
+    similitud = np.dot(
+        vector1,
+        vector2
+    ) / (
+        norma1 * norma2
     )
 
-    imagenes_1 = tf.concat(
-        [
-            imagen1,
-            imagen1_espejada,
-            imagen1,
-            imagen1_espejada
-        ],
-        axis=0
+    similitud = np.clip(
+        similitud,
+        0.0,
+        1.0
     )
 
-    imagenes_2 = tf.concat(
-        [
-            imagen2,
-            imagen2,
-            imagen2_espejada,
-            imagen2_espejada
-        ],
-        axis=0
-    )
-
-    predicciones = modelo_final.predict(
-        [imagenes_1, imagenes_2],
-        verbose=0
-    ).reshape(-1)
-
-    return float(
-        np.mean(predicciones)
-    )
-
+    return float(similitud)
 
 # --------------------------------------------------
 # Convertir imagen a Data URI
