@@ -522,24 +522,24 @@ Exportación del modelo
 ## Flujo de la aplicación
 
 ```text
-📷 Subir imagen 1
-        +
-📷 Subir imagen 2
+📷 Subir fotografía del perro perdido
         ↓
-🧠 Red neuronal
+🧠 Extracción de características
         ↓
-   Comparación
+🔎 Comparación con fotografías candidatas
         ↓
-┌────────────────────────┐
-│ Resultado              │
-│                        │
-│ ✅ Mismo perro         │
-│        o               │
-│ ❌ Perros diferentes   │
-└────────────────────────┘
+📊 Cálculo y ordenamiento por similitud
+        ↓
+┌────────────────────────────┐
+│ Resultado                  │
+│                            │
+│ 🏆 Posibles coincidencias  │
+│            o               │
+│ ⚠️ Sin coincidencia alta   │
+└────────────────────────────┘
 ```
 
-A partir de esta funcionalidad se buscará evolucionar el MVP hacia un sistema de identificación y re-identificación de perros aplicable al contexto de **Bolívar**.
+La aplicación permite cargar una fotografía de un perro perdido y compararla con las fotografías candidatas registradas. Las imágenes se ordenan según su nivel de similitud y se muestran las principales coincidencias. Cuando la mayor similitud no alcanza el límite establecido, el sistema informa que no se encontró una coincidencia suficientemente alta.
 
 ---
 
