@@ -14,7 +14,7 @@
 4. **Entrenar y evaluar diferentes versiones del modelo** utilizando métricas de clasificación.
 5. **Aplicar un ciclo de mejora** a partir de los resultados obtenidos.
 6. **Guardar el modelo entrenado** para integrarlo en una aplicación.
-7. **Desarrollar una aplicación** que permita cargar dos fotografías y obtener una predicción.
+7. **Desarrollar una aplicación** que permita cargar una fotografía de un perro perdido y buscar posibles coincidencias entre las fotografías candidatas.
 8. **Adaptar progresivamente el sistema al contexto de Bolívar**.
 
 ---
@@ -175,6 +175,42 @@ Learning rate fine-tuning:    0.00001
 Épocas iniciales:             10
 Épocas fine-tuning:           5
 ```
+
+---
+
+# 🔎 Búsqueda de Coincidencias
+
+Para la búsqueda de perros candidatos, la aplicación utiliza el vector de características generado por la capa `extractor_128`.
+
+Se calcula la **similitud coseno** entre la fotografía cargada por el usuario y cada fotografía candidata.
+
+Las fotografías se ordenan de mayor a menor similitud y se muestran las principales coincidencias.
+
+## Límite de similitud
+
+Para evitar presentar como coincidencia una fotografía con una similitud demasiado baja, se estableció un límite de:
+
+```text
+0,76 → 76 %
+```
+
+Si la mayor similitud encontrada es inferior a este valor, la aplicación informa que no se encontró una coincidencia suficientemente alta.
+
+## Evaluación de la similitud
+
+Se evaluaron **1.600 pares de fotografías**:
+
+```text
+800 pares → mismo perro
+800 pares → perros diferentes
+```
+
+| Métrica | Resultado |
+|---|---:|
+| **Accuracy** | **87,81 %** |
+| **Precision** | **84,89 %** |
+| **Recall** | **92,00 %** |
+| **F1-score** | **88,30 %** |
 
 ---
 
