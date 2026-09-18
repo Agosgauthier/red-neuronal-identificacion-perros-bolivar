@@ -905,17 +905,25 @@ footer {
     width: 100% !important;
 
     min-width: 0 !important;
+
+    height: 500px !important;
 }
 
 #lost-dog-image .wrap {
 
-    min-height: 330px !important;
-
     width: 100% !important;
+
+    height: 500px !important;
+
+    min-height: 500px !important;
+
+    max-height: 500px !important;
 
     box-sizing: border-box !important;
 
     border-radius: 19px !important;
+
+    overflow: hidden !important;
 
     border:
         2px dashed
@@ -932,9 +940,101 @@ footer {
             #0c2940,
             #10384f
         ) !important;
+}
 
-    transition:
-        0.2s ease !important;
+#lost-dog-image .image-container {
+
+    width: 100% !important;
+
+    height: 100% !important;
+
+    min-height: 0 !important;
+
+    max-height: none !important;
+
+    padding: 0 !important;
+
+    margin: 0 !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    overflow: hidden !important;
+}
+
+#lost-dog-image .image-frame {
+
+    width: 100% !important;
+
+    height: 100% !important;
+
+    min-width: 0 !important;
+
+    min-height: 0 !important;
+
+    max-width: none !important;
+
+    max-height: none !important;
+
+    padding: 0 !important;
+
+    margin: 0 !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    overflow: hidden !important;
+}
+
+#lost-dog-image .upload-container {
+
+    width: 100% !important;
+
+    height: 100% !important;
+
+    min-height: 0 !important;
+
+    max-height: none !important;
+
+    padding: 0 !important;
+
+    margin: 0 !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    overflow: hidden !important;
+}
+
+#lost-dog-image img {
+
+    width: 100% !important;
+
+    height: 100% !important;
+
+    min-width: 100% !important;
+
+    min-height: 100% !important;
+
+    max-width: none !important;
+
+    max-height: none !important;
+
+    object-fit: cover !important;
+
+    object-position: center !important;
+
+    display: block !important;
+
 }
 
 #lost-dog-image .wrap:hover {
@@ -949,7 +1049,6 @@ footer {
             #124158
         ) !important;
 }
-
 
 /* ==================================================
    IMAGEN DECORATIVA
@@ -1912,7 +2011,9 @@ with gr.Blocks(
                     type="numpy",
                     show_label=False,
                     label="",
-                    elem_id="lost-dog-image"
+                    elem_id="lost-dog-image",
+                    height=500,
+                    width="100%"
                 )
 
 
