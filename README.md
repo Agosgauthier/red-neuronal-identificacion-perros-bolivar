@@ -444,6 +444,7 @@ Permitir que un agente pueda:
 red-neuronal-identificacion-perros-bolivar/
 │
 ├── 📂 model/
+│   ├── 📄 modelo_perros_bolivar_12000_app.keras
 │   └── 📄 modelo_perros_bolivar_final.keras
 │
 ├── 📂 data/
