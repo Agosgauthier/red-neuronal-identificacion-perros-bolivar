@@ -35,6 +35,7 @@ RUTA_CANDIDATOS = (
     / "candidates"
 )
 
+UMBRAL_COINCIDENCIA = 0.76
 
 # --------------------------------------------------
 # Cargar modelo
@@ -168,7 +169,7 @@ def cargar_candidato(ruta):
 
 
 # --------------------------------------------------
-# Obtener probabilidad
+# Obtener similitud
 # --------------------------------------------------
 
 def obtener_probabilidad_mismo(imagen1, imagen2):
@@ -449,6 +450,30 @@ def buscar_coincidencias(imagen_perdido):
         key=lambda resultado: resultado["probabilidad"],
         reverse=True
     )
+
+    if resultados[0]["probabilidad"] < UMBRAL_COINCIDENCIA:
+
+        mejor_porcentaje = (
+            resultados[0]["probabilidad"] * 100
+        )
+
+        resumen = f"""
+        <div class="result-message warning">
+            ⚠️ No se encontró una coincidencia suficientemente alta.
+            La mayor similitud encontrada fue de
+            {mejor_porcentaje:.2f}%.
+        </div>
+
+        <div class="result-count">
+            Se analizaron {len(resultados)}
+            fotografías candidatas.
+        </div>
+        """
+
+        return (
+            resumen,
+            generar_tarjetas([])
+        )
 
     mejores = resultados[:5]
 
@@ -2108,7 +2133,7 @@ with gr.Blocks(
                 """
                 <div class="info-note">
                     <strong>ℹ️ Importante:</strong>
-                    la probabilidad es una estimación del modelo
+                    la similitud es una estimación del modelo
                     y no confirma por sí sola la identidad del perro.
                 </div>
                 """
