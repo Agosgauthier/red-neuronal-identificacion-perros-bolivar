@@ -226,7 +226,7 @@ El modelo fue evaluado utilizando:
 
 El conjunto de prueba contiene perros que **no fueron utilizados durante el entrenamiento**.
 
-## Resultados del modelo final
+## Resultados del clasificador original
 
 | Métrica | Resultado |
 |---|---:|
