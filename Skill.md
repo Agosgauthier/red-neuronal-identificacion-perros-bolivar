@@ -96,6 +96,18 @@ Labels:
 0 → perros diferentes
 ```
 
+### Configuración actual
+
+400 perros → entrenamiento
+100 perros → prueba
+
+8.000 pares → entrenamiento
+2.000 pares → prueba
+
+Total: 10.000 pares
+
+---
+
 ### Pares positivos
 
 Dos imágenes pertenecientes al mismo identificador de perro.
@@ -296,10 +308,11 @@ Mejora aparente
 
 # 💾 Gestión de Modelos
 
-El modelo actual se encuentra en:
+Los modelos del proyecto se encuentran en:
 
 ```text
 model/modelo_perros_bolivar_final.keras
+model/modelo_perros_bolivar_12000_app.keras
 ```
 
 ### Procedimiento recomendado

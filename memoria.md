@@ -80,22 +80,22 @@ Los pares fueron balanceados para mantener una cantidad equivalente de ejemplos 
 Para el experimento final se seleccionaron:
 
 ```text
-100 perros → entrenamiento
-20 perros  → prueba
+400 perros → entrenamiento
+100 perros → prueba
 ```
 
 Se generaron:
 
 ```text
-4.000 pares → entrenamiento
-800 pares   → prueba
+8.000 pares → entrenamiento
+2.000 pares → prueba
 ```
 
 Distribución:
 
 ```text
-2.000 pares de mismo perro
-2.000 pares de perros diferentes
+4.000 pares de mismo perro
+4.000 pares de perros diferentes
 ```
 
 para entrenamiento.
@@ -103,8 +103,8 @@ para entrenamiento.
 Y:
 
 ```text
-400 pares de mismo perro
-400 pares de perros diferentes
+1.000 pares de mismo perro
+1.000 pares de perros diferentes
 ```
 
 para prueba.
@@ -254,11 +254,11 @@ Se amplió el experimento utilizando una mayor cantidad de perros y pares.
 Configuración:
 
 ```text
-100 perros de entrenamiento
-20 perros de prueba
+400 perros de entrenamiento
+100 perros de prueba
 
-4.000 pares de entrenamiento
-800 pares de prueba
+8.000 pares de entrenamiento
+2.000 pares de prueba
 ```
 
 Resultado:
@@ -293,10 +293,10 @@ Se realizaron:
 Resultado final:
 
 ```text
-Accuracy: 72,13 %
-Precision: 72,18 %
-Recall: 72,00 %
-F1-score: 72,09 %
+Accuracy: 82,15 %
+Precision: 79,80 %
+Recall: 86,10 %
+F1-score: 82,83 %
 ```
 
 ---
@@ -337,7 +337,7 @@ Más datos
 Accuracy: 69,25 %
        ↓
 Fine-tuning
-Accuracy: 72,13 %
+Accuracy: 82,15 %
 ```
 
 La mejor versión actual es la versión con **MobileNetV2 + fine-tuning**.
@@ -410,6 +410,7 @@ Matplotlib
 red-neuronal-identificacion-perros-bolivar/
 │
 ├── model/
+│   ├── modelo_perros_bolivar_12000_app.keras
 │   └── modelo_perros_bolivar_final.keras
 │
 ├── data/
@@ -440,7 +441,7 @@ El agente debe recordar que:
 - El modelo actual utiliza una arquitectura Siamese.
 - MobileNetV2 funciona como extractor de características.
 - El modelo fue ajustado mediante fine-tuning.
-- El resultado final actual es de 72,13 % de accuracy.
+- El resultado final actual es de 82,15 % de accuracy.
 - Los datos de prueba deben mantenerse separados de los datos de entrenamiento.
 - No se deben inventar resultados experimentales.
 - Cada nueva mejora debe ser evaluada antes de considerarse definitiva.
@@ -539,10 +540,10 @@ modelo_perros_bolivar_final.keras
 Métricas:
 
 ```text
-Accuracy: 72,13 %
-Precision: 72,18 %
-Recall: 72,00 %
-F1-score: 72,09 %
+Accuracy: 82,15 %
+Precision: 79,80 %
+Recall: 86,10 %
+F1-score: 82,83 %
 ```
 
 Este modelo debe considerarse la **línea base actual** para las próximas mejoras.

@@ -21,9 +21,8 @@ TEST_CSV = PROYECTO / "dataset" / "pares_test_grande.csv"
 RUTA_MODELO = (
     PROYECTO
     / "model"
-    / "modelo_perros_bolivar_12000.keras"
+    / "modelo_perros_bolivar_12000_app.keras"
 )
-
 
 # ============================================================
 # SEMILLAS

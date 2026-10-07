@@ -2,7 +2,7 @@
 
 ## Proyecto de Redes Neuronales
 
-**Sistema de comparación de imágenes para determinar si dos fotografías corresponden al mismo perro.**
+**Sistema de comparación de imágenes basado en una red Siamese para identificar posibles coincidencias de un perro perdido entre fotografías candidatas.**
 
 ---
 
@@ -151,11 +151,13 @@ Los valores de los píxeles fueron normalizados antes de ingresar al modelo.
 ## Dataset experimental final
 
 ```text
-100 perros → entrenamiento
-20 perros  → prueba
+400 perros → entrenamiento
+100 perros  → prueba
 
-4.000 pares → entrenamiento
-800 pares   → prueba
+8.000 pares → entrenamiento
+2.000 pares   → prueba
+
+Total: 10.000 pares de fotografías
 ```
 
 Los pares fueron balanceados:
@@ -196,7 +198,7 @@ Para evitar presentar como coincidencia una fotografía con una similitud demasi
 
 Si la mayor similitud encontrada es inferior a este valor, la aplicación informa que no se encontró una coincidencia suficientemente alta.
 
-## Evaluación de la similitud
+## Evaluación de la búsqueda por similitud
 
 Se evaluaron **1.600 pares de fotografías**:
 
@@ -226,7 +228,7 @@ El modelo fue evaluado utilizando:
 
 El conjunto de prueba contiene perros que **no fueron utilizados durante el entrenamiento**.
 
-## Resultados del clasificador original
+## Resultados de una versión anterior
 
 | Métrica | Resultado |
 |---|---:|
@@ -312,11 +314,11 @@ Aunque algunas métricas mejoraron, el rendimiento general todavía no era sufic
 Se amplió el conjunto experimental utilizando:
 
 ```text
-100 perros → entrenamiento
-20 perros  → prueba
+400 perros → entrenamiento
+100 perros → prueba
 
-4.000 pares → entrenamiento
-800 pares   → prueba
+8.000 pares → entrenamiento
+2.000 pares → prueba
 ```
 
 Resultado:
@@ -343,10 +345,10 @@ Se utilizó un learning rate menor:
 Resultado final:
 
 ```text
-Accuracy: 72,13 %
-Precision: 72,18 %
-Recall: 72,00 %
-F1-score: 72,09 %
+Accuracy: 82,15 %
+Precision: 79,80 %
+Recall: 86,10 %
+F1-score: 82,83 %
 ```
 
 ## Evolución del modelo
@@ -356,29 +358,25 @@ F1-score: 72,09 %
    ↓
 69,25 %
    ↓
-72,13 %
+82,15 %
 ```
 
 ---
 
-# 💾 Modelo Entrenado
+# 💾 Modelos Entrenados
 
-El modelo final se encuentra almacenado en:
+El proyecto contiene dos modelos principales:
 
-```text
-model/modelo_perros_bolivar_final.keras
-```
+- `model/modelo_perros_bolivar_final.keras`  
+  Modelo utilizado para la clasificación binaria entre dos fotografías.
 
-Formato utilizado:
+- `model/modelo_perros_bolivar_12000_app.keras`  
+  Modelo utilizado por la aplicación para extraer características mediante `extractor_128` y realizar la búsqueda por similitud.
+
+Ambos modelos utilizan el formato:
 
 ```text
 .keras
-```
-
-Tamaño aproximado:
-
-```text
-9,85 MB
 ```
 
 ---
@@ -398,7 +396,7 @@ Se utiliza para:
 - Fine-tuning.
 - Evaluación.
 - Experimentación con diferentes modelos.
-- Exportación del modelo final.
+- Exportación de los modelos entrenados.
 
 ## Visual Studio Code
 
@@ -408,7 +406,7 @@ Visual Studio Code se utiliza para:
 - Desarrollo del código.
 - Documentación.
 - Integración del modelo.
-- Desarrollo de la interfaz de la comparación.
+- Desarrollo de la interfaz de búsqueda de coincidencias.
 - Gestión del repositorio Git.
 
 ---

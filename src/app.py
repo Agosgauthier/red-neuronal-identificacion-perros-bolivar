@@ -105,7 +105,7 @@ def comparar_perros(imagen1, imagen2):
     probabilidad_mismo = float(prediccion)
     probabilidad_diferente = 1 - probabilidad_mismo
 
-    if probabilidad_mismo >= 0.5:
+    if probabilidad_mismo >= UMBRAL_COINCIDENCIA:
         return (
             "🐕✅ MISMO PERRO\n\n"
             f"Probabilidad de mismo perro: "

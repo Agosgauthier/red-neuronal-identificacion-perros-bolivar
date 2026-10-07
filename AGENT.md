@@ -80,11 +80,13 @@ El dataset contiene:
 Para el experimento final se trabajó con:
 
 ```text
-100 perros → entrenamiento
-20 perros  → prueba
+400 perros → entrenamiento
+100 perros → prueba
 
-4.000 pares → entrenamiento
-800 pares   → prueba
+8.000 pares → entrenamiento
+2.000 pares → prueba
+
+Total: 10.000 pares de fotografías
 ```
 
 Los pares están balanceados:
@@ -101,10 +103,10 @@ Los pares están balanceados:
 El modelo final obtenido durante la experimentación alcanzó:
 
 ```text
-Accuracy: 72,13 %
-Precision: 72,18 %
-Recall: 72,00 %
-F1-score: 72,09 %
+Accuracy: 82,15 %
+Precision: 79,80 %
+Recall: 86,10 %
+F1-score: 82,83 %
 ```
 
 El modelo se encuentra en:
@@ -176,6 +178,7 @@ Visual Studio Code se utiliza para:
 red-neuronal-identificacion-perros-bolivar/
 │
 ├── model/
+│   ├── modelo_perros_bolivar_12000_app.keras
 │   └── modelo_perros_bolivar_final.keras
 │
 ├── data/

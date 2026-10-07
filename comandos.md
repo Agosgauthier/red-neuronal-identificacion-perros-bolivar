@@ -162,6 +162,13 @@ Labels:
 1 → mismo perro
 0 → perros diferentes
 ```
+400 perros → entrenamiento
+100 perros → prueba
+
+8.000 pares → entrenamiento
+2.000 pares → prueba
+
+Total: 10.000 pares
 
 ## Archivos generados
 
@@ -393,6 +400,7 @@ git log --oneline
 red-neuronal-identificacion-perros-bolivar/
 │
 ├── model/
+│   ├── modelo_perros_bolivar_12000_app.keras
 │   └── modelo_perros_bolivar_final.keras
 │
 ├── data/

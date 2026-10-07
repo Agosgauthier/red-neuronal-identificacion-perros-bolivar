@@ -86,8 +86,8 @@ print("Perros disponibles en test:", len(todos_test))
 # Seleccionar perros
 # ---------------------------------------
 
-perros_train = random.sample(todos_train, 100)
-perros_test = random.sample(todos_test, 20)
+perros_train = random.sample(todos_train, 400)
+perros_test = random.sample(todos_test, 100)
 
 
 # ---------------------------------------
@@ -96,12 +96,12 @@ perros_test = random.sample(todos_test, 20)
 
 df_train = crear_dataset(
     perros_train,
-    pares_por_perro=60
+    pares_por_perro=10
 )
 
 df_test = crear_dataset(
     perros_test,
-    pares_por_perro=40
+    pares_por_perro=10
 )
 
 
