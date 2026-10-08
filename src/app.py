@@ -1,11 +1,14 @@
 from pathlib import Path
 import base64
 import html
+import json
+from datetime import datetime
+
+from PIL import Image
 
 import gradio as gr
 import numpy as np
 import tensorflow as tf
-
 
 # --------------------------------------------------
 # Capa utilizada por nuestro modelo
@@ -33,6 +36,19 @@ RUTA_CANDIDATOS = (
     BASE_DIR
     / "data"
     / "candidates"
+)
+
+RUTA_ENCONTRADOS = (
+    BASE_DIR
+    / "data"
+    / "found"
+)
+
+RUTA_DATOS_ENCONTRADOS = (
+    BASE_DIR
+    / "data"
+    / "found"
+    / "datos.json"
 )
 
 UMBRAL_COINCIDENCIA = 0.76
@@ -132,18 +148,125 @@ def obtener_candidatos():
         ".webp"
     }
 
-    if not RUTA_CANDIDATOS.exists():
-        return []
+    candidatos = []
 
-    return sorted(
-        [
-            ruta
-            for ruta in RUTA_CANDIDATOS.iterdir()
-            if ruta.is_file()
-            and ruta.suffix.lower() in extensiones_validas
-        ]
+    if RUTA_CANDIDATOS.exists():
+
+        candidatos.extend(
+            [
+                ruta
+                for ruta in RUTA_CANDIDATOS.iterdir()
+                if ruta.is_file()
+                and ruta.suffix.lower() in extensiones_validas
+            ]
+        )
+
+    if RUTA_ENCONTRADOS.exists():
+
+        candidatos.extend(
+            [
+                ruta
+                for ruta in RUTA_ENCONTRADOS.iterdir()
+                if ruta.is_file()
+                and ruta.suffix.lower() in extensiones_validas
+            ]
+        )
+
+
+    return sorted(candidatos)
+
+# --------------------------------------------------
+# Registrar perro encontrado
+# --------------------------------------------------
+
+def registrar_perro_encontrado(
+    imagen,
+    zona,
+    fecha,
+    descripcion,
+    contacto
+):
+
+    if imagen is None:
+        return "⚠️ Primero cargá una fotografía del perro."
+
+    if not zona or not zona.strip():
+        return "⚠️ Indicá dónde encontraste al perro."
+
+    if not fecha or not fecha.strip():
+        return "⚠️ Indicá la fecha en la que lo encontraste."
+
+    if not contacto or not contacto.strip():
+        return "⚠️ Indicá un medio de contacto."
+
+    RUTA_ENCONTRADOS.mkdir(
+        parents=True,
+        exist_ok=True
     )
 
+    fecha_registro = datetime.now()
+
+    nombre_archivo = (
+
+        "encontrado_"
+        + fecha_registro.strftime("%Y%m%d_%H%M%S")
+        + ".jpg"
+    )
+
+    ruta_imagen = RUTA_ENCONTRADOS / nombre_archivo
+
+    imagen_guardar = Image.fromarray(
+        np.asarray(imagen).astype(np.uint8)
+    ).convert("RGB")
+
+    imagen_guardar.save(ruta_imagen, "JPEG")
+
+    datos = []
+
+    if RUTA_DATOS_ENCONTRADOS.exists():
+
+        try:
+            with open(
+                RUTA_DATOS_ENCONTRADOS,
+                "r",
+                encoding="utf-8"
+            ) as archivo:
+                datos = json.load(archivo)
+
+        except Exception:
+            datos = []
+
+    datos.append(
+        {
+            "imagen": nombre_archivo,
+            "zona": zona.strip(),
+
+            "fecha": fecha.strip(),
+            "descripcion": (
+                descripcion.strip() if descripcion else ""
+            ),
+            "contacto": contacto.strip(),
+            "fecha_registro": fecha_registro.isoformat()
+        }
+    )
+
+    with open(
+        RUTA_DATOS_ENCONTRADOS,
+        "w",
+        encoding="utf-8"
+    ) as archivo:
+        json.dump(
+            datos,
+            archivo,
+            ensure_ascii=False,
+            indent=4
+        )
+
+    return (
+        "✅ Perro registrado correctamente.\n\n"
+        "La fotografía ya forma parte de la "
+        "base de búsqueda."
+    )
 
 # --------------------------------------------------
 # Cargar candidato
@@ -269,6 +392,35 @@ def obtener_imagen_decorativa():
 
 HERO_IMAGE = obtener_imagen_decorativa()
 
+# --------------------------------------------------
+# Obtener datos de perro encontrado
+# --------------------------------------------------
+
+def obtener_datos_encontrado(ruta):
+
+    if not ruta.is_relative_to(RUTA_ENCONTRADOS):
+        return None
+
+    if not RUTA_DATOS_ENCONTRADOS.exists():
+        return None
+
+    try:
+        with open(
+            RUTA_DATOS_ENCONTRADOS,
+            "r",
+            encoding="utf-8"
+        ) as archivo:
+            datos = json.load(archivo)
+
+    except Exception:
+        return None
+
+    for registro in datos:
+
+        if registro.get("imagen") == ruta.name:
+            return registro
+
+    return None
 
 # --------------------------------------------------
 # Generar tarjetas
@@ -317,6 +469,10 @@ def generar_tarjetas(resultados):
             ruta
         )
 
+        datos_encontrado = obtener_datos_encontrado(
+            ruta
+        )
+
         if probabilidad >= 80:
             nivel_clase = "high"
             nivel_texto = "Alta coincidencia"
@@ -326,6 +482,48 @@ def generar_tarjetas(resultados):
         else:
             nivel_clase = "low"
             nivel_texto = "Coincidencia baja"
+
+        datos_html = ""
+
+        if datos_encontrado:
+
+            zona = html.escape(
+                datos_encontrado.get("zona", "")
+            )
+
+            fecha = html.escape(
+                datos_encontrado.get("fecha", "")
+            )
+
+            descripcion = html.escape(
+                datos_encontrado.get("descripcion", "")
+            )
+
+            contacto = html.escape(
+                datos_encontrado.get("contacto", "")
+            )
+
+            datos_html = f"""
+                <div class="found-details">
+
+                    <div>
+                        📍 <strong>Zona:</strong> {zona}
+                    </div>
+
+                    <div>
+                        📅 <strong>Fecha:</strong> {fecha}
+                    </div>
+
+                    <div>
+                        📝 <strong>Descripción:</strong> {descripcion or "Sin descripción"}
+                    </div>
+
+                    <div>
+                        📞 <strong>Contacto:</strong> {contacto}
+                    </div>
+
+                </div>
+            """
 
         tarjeta = f"""
         <div class="candidate-card">
@@ -360,6 +558,8 @@ def generar_tarjetas(resultados):
                 <div class="candidate-description">
                     estimación de similitud
                 </div>
+
+                {datos_html}
 
             </div>
 
@@ -1797,7 +1997,6 @@ footer {
     line-height: 1.5;
 }
 
-
 /* ==================================================
    FOOTER
    ================================================== */
@@ -2139,6 +2338,74 @@ with gr.Blocks(
                 """
             )
 
+        # ------------------------------------------
+        # Registrar perro encontrado
+        # ------------------------------------------
+
+        with gr.Group(
+            elem_classes="results-panel"
+        ):
+
+            gr.HTML(
+                """
+                <div class="results-heading">
+
+                    <div class="results-heading-icon">
+                        🐕
+                    </div>
+
+                    <div>
+                        Encontré un perro
+                    </div>
+
+                </div>
+
+                <div class="results-description">
+                    Si encontraste un perro en la calle,
+                    podés registrarlo aunque no seas su dueño.
+                    La fotografía quedará disponible para
+                    futuras búsquedas.
+                </div>
+                """
+            )
+
+            imagen_encontrado = gr.Image(
+                type="numpy",
+                show_label=True,
+                label="Fotografía del perro encontrado",
+                height=350
+            )
+
+            zona_encontrado = gr.Textbox(
+                label="¿Dónde lo encontraste?",
+                placeholder="Ejemplo: Barrio San José, Bolívar"
+            )
+
+            fecha_encontrado = gr.Textbox(
+                label="¿Cuándo lo encontraste?",
+                placeholder="Ejemplo: 08/10/2026"
+            )
+
+            descripcion_encontrado = gr.Textbox(
+                label="Descripción",
+                placeholder="Ejemplo: perro mediano, collar azul, muy tranquilo",
+                lines=3
+            )
+
+            contacto_encontrado = gr.Textbox(
+                label="Medio de contacto",
+                placeholder="Ejemplo: WhatsApp 2314-123456"
+            )
+
+            boton_registrar = gr.Button(
+                "🐕 Registrar perro encontrado",
+                variant="primary"
+            )
+
+            resultado_registro = gr.Textbox(
+                label="Resultado",
+                interactive=False
+            )
 
         # ------------------------------------------
         # Footer
@@ -2177,6 +2444,17 @@ with gr.Blocks(
         ]
     )
 
+    boton_registrar.click(
+        fn=registrar_perro_encontrado,
+        inputs=[
+            imagen_encontrado,
+            zona_encontrado,
+            fecha_encontrado,
+            descripcion_encontrado,
+            contacto_encontrado
+        ],
+        outputs=resultado_registro
+    )
 
 # --------------------------------------------------
 # Ejecutar
