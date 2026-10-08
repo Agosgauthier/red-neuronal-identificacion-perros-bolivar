@@ -301,7 +301,7 @@ F1-score: 82,83 %
 
 ---
 
-# 📊 Matriz de Confusión Final
+# 📊 Matriz de Confusión (evaluación anterior, 72,13 %)
 
 La matriz de confusión obtenida fue:
 
@@ -441,7 +441,7 @@ El agente debe recordar que:
 - El modelo actual utiliza una arquitectura Siamese.
 - MobileNetV2 funciona como extractor de características.
 - El modelo fue ajustado mediante fine-tuning.
-- El resultado final actual es de 82,15 % de accuracy.
+- El modelo clasificador final tiene 82,15 % de accuracy y el modelo de la aplicación tiene 87,81 % en búsqueda por similitud.
 - Los datos de prueba deben mantenerse separados de los datos de entrenamiento.
 - No se deben inventar resultados experimentales.
 - Cada nueva mejora debe ser evaluada antes de considerarse definitiva.
@@ -531,19 +531,15 @@ El proyecto se encuentra en una etapa funcional de desarrollo, con el modelo int
 
 # 🧠 Último Estado Conocido
 
-La mejor versión disponible actualmente es:
+Modelos disponibles:
 
-```text
-modelo_perros_bolivar_final.keras
-```
+- `modelo_perros_bolivar_final.keras`: clasificador binario de dos fotografías.
+  Accuracy 82,15 % | Precision 79,80 % | Recall 86,10 % | F1-score 82,83 %
 
-Métricas:
+- `modelo_perros_bolivar_12000_app.keras`: modelo usado por la aplicación.
+  Evaluado en búsqueda por similitud con 1.600 pares (800 mismo perro y 800 perros diferentes):
+  Accuracy 87,81 % | Precision 84,89 % | Recall 92,00 % | F1-score 88,30 %
 
-```text
-Accuracy: 82,15 %
-Precision: 79,80 %
-Recall: 86,10 %
-F1-score: 82,83 %
-```
+Umbral de coincidencia en la aplicación: 0,76.
 
-Este modelo debe considerarse la **línea base actual** para las próximas mejoras.
+La línea base actual para próximas mejoras es el modelo de la aplicación (87,81 %).

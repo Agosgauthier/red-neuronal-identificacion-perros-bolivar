@@ -100,7 +100,9 @@ Los pares están balanceados:
 
 # 📈 Modelo Actual
 
-El modelo final obtenido durante la experimentación alcanzó:
+Hay dos modelos en el proyecto:
+
+- `model/modelo_perros_bolivar_final.keras`: clasificador binario de dos fotografías.
 
 ```text
 Accuracy: 82,15 %
@@ -109,12 +111,14 @@ Recall: 86,10 %
 F1-score: 82,83 %
 ```
 
-El modelo se encuentra en:
+- `model/modelo_perros_bolivar_12000_app.keras`: modelo usado por la aplicación (búsqueda por similitud, evaluado con 1.600 pares).
 
 ```text
-model/modelo_perros_bolivar_final.keras
+Accuracy: 87,81 %
+Precision: 84,89 %
+Recall: 92,00 %
+F1-score: 88,30 %
 ```
-
 ---
 
 # 🔄 Metodología de Trabajo
