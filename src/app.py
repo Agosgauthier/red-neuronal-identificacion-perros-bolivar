@@ -1246,20 +1246,138 @@ footer {
 
     height: 100% !important;
 
-    min-width: 100% !important;
+    min-width: 0 !important;
 
-    min-height: 100% !important;
+    min-height: 0 !important;
 
-    max-width: none !important;
-
-    max-height: none !important;
-
-    object-fit: cover !important;
+    object-fit: contain !important;
 
     object-position: center !important;
 
     display: block !important;
 
+}
+
+#found-dog-image {
+
+    width: 100% !important;
+
+    height: 350px !important;
+}
+
+#found-dog-image .wrap {
+
+    width: 100% !important;
+
+    height: 350px !important;
+
+    min-height: 350px !important;
+
+    max-height: 350px !important;
+
+    box-sizing: border-box !important;
+
+    border-radius: 19px !important;
+
+    overflow: hidden !important;
+
+    border:
+        2px dashed
+        rgba(
+            65,
+            206,
+            224,
+            0.58
+        ) !important;
+
+    background:
+        linear-gradient(
+            145deg,
+            #0c2940,
+            #10384f
+        ) !important;
+}
+
+#found-dog-image .image-container {
+
+    width: 100% !important;
+
+    height: 100% !important;
+
+    min-height: 0 !important;
+
+    padding: 0 !important;
+
+    margin: 0 !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    overflow: hidden !important;
+}
+
+#found-dog-image .image-frame {
+
+    width: 100% !important;
+
+    height: 100% !important;
+
+    min-width: 0 !important;
+
+    min-height: 0 !important;
+
+    padding: 0 !important;
+
+    margin: 0 !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    overflow: hidden !important;
+}
+
+#found-dog-image .upload-container {
+
+    width: 100% !important;
+
+    height: 100% !important;
+
+    min-height: 0 !important;
+
+    padding: 0 !important;
+
+    margin: 0 !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    overflow: hidden !important;
+}
+
+#found-dog-image img {
+
+    width: 100% !important;
+
+    height: 100% !important;
+
+    min-width: 0 !important;
+
+    min-height: 0 !important;
+
+    object-fit: contain !important;
+
+    object-position: center !important;
+
+    display: block !important;
 }
 
 #lost-dog-image .wrap:hover {
@@ -2373,6 +2491,7 @@ with gr.Blocks(
                 type="numpy",
                 show_label=True,
                 label="Fotografía del perro encontrado",
+                elem_id="found-dog-image",
                 height=350
             )
 
