@@ -332,8 +332,8 @@ Tamaño aproximado: 5 MB.
 Modelos del experimento de comparación (MobileNetV2), que ya no usa la aplicación:
 
 ```text
-model/modelo_perros_bolivar_12000_app.keras
-model/modelo_perros_bolivar_final.keras
+experimentos/mobilenet_preentrenado/modelo_perros_bolivar_12000_app.keras
+experimentos/mobilenet_preentrenado/modelo_perros_bolivar_final.keras
 ```
 
 ---
@@ -379,26 +379,42 @@ Gradio
 ```text
 red-neuronal-identificacion-perros-bolivar/
 │
+├── .github/workflows/
+│   └── ci.yml
+│
 ├── model/
-│   ├── modelo_perros_bolivar_scratch.keras
-│   ├── modelo_perros_bolivar_12000_app.keras
-│   └── modelo_perros_bolivar_final.keras
+│   └── modelo_perros_bolivar_scratch.keras
+│
+├── experimentos/
+│   └── mobilenet_preentrenado/    (versión anterior con MobileNetV2, NO es la entrega)
 │
 ├── data/
+│   ├── candidates/                (fotos candidatas de la galería)
+│   ├── found/                     (fotos de perros encontrados, no se sube a Git)
 │   ├── raw/
-│   └── processed/
+│   ├── processed/
+│   └── perros.db                  (base SQLite, no se sube a Git)
 │
 ├── notebooks/
+│   └── red_desde_cero_perros.ipynb
 │
 ├── src/
+│   ├── __init__.py
+│   ├── app.py
+│   ├── db.py
+│   ├── generar_pares.py
+│   └── migrar_json_a_sqlite.py
 │
 ├── tests/
+│   ├── test_app.py
+│   └── test_db.py
 │
 ├── README.md
 ├── AGENT.md
 ├── memoria.md
 ├── comandos.md
 ├── Skill.md
+├── requirements.txt
 └── .gitignore
 ```
 
@@ -433,6 +449,8 @@ Nunca considerar una mejora sin comparar métricas.
 Nunca eliminar el modelo funcional sin comprobar previamente la nueva versión.
 
 Nunca incorporar pesos preentrenados al modelo entregado.
+
+Nunca usar ni modificar los archivos de `experimentos/` como parte de la entrega.
 
 Mantener documentados:
 
@@ -498,6 +516,14 @@ El proyecto cuenta actualmente con:
 
 ✅ Registro de perros encontrados implementado
 
+✅ Registros de perros encontrados guardados en SQLite (data/perros.db)
+
+✅ Caché de vectores en la búsqueda de coincidencias
+
+✅ Experimento con MobileNetV2 archivado en experimentos/mobilenet_preentrenado/ (no es la entrega)
+
+✅ Aplicación ejecutable con python -m src.app
+
 ✅ Pruebas automatizadas implementadas
 
 ✅ Repositorio creado
@@ -529,6 +555,7 @@ Limitaciones conocidas:
 
 - A veces puntúan alto perros distintos con colores parecidos.
 - Las fotos del dataset de un mismo perro se parecen mucho entre sí; con fotos reales de Bolívar el rendimiento podría ser menor.
-- La aplicación recalcula las características de cada foto candidata en cada búsqueda, por lo que no escala a miles de fotos sin guardar los vectores precalculados.
+- Los vectores de las fotos candidatas se guardan en caché mientras la aplicación está abierta, pero no hay un índice persistente: con miles de fotos la primera búsqueda tardaría mucho.
+- Con pocas fotos en la galería, los puntajes de perros distintos quedan muy juntos (en pruebas manuales, entre 92 % y 99 %) y el perro correcto no siempre queda primero.
 
 La línea base actual para próximas mejoras es el modelo final desde cero (87,55 % en pares y 54 % de acierto en primer lugar).

@@ -108,30 +108,18 @@ def comparar_perros(imagen1, imagen2):
     if imagen1 is None or imagen2 is None:
         return "⚠️ Cargá las dos imágenes."
 
-    imagen1 = preparar_imagen(imagen1)
-    imagen2 = preparar_imagen(imagen2)
+    similitud = obtener_probabilidad_mismo(imagen1, imagen2)
 
-    prediccion = modelo_final.predict(
-        [imagen1, imagen2],
-        verbose=0
-    )[0][0]
-
-    probabilidad_mismo = float(prediccion)
-    probabilidad_diferente = 1 - probabilidad_mismo
-
-    if probabilidad_mismo >= UMBRAL_COINCIDENCIA:
+    if similitud >= UMBRAL_COINCIDENCIA:
         return (
             "🐕✅ MISMO PERRO\n\n"
-            f"Probabilidad de mismo perro: "
-            f"{probabilidad_mismo * 100:.2f}%"
+            f"Similitud: {similitud * 100:.2f}%"
         )
 
     return (
         "🐕❌ PERROS DIFERENTES\n\n"
-        f"Probabilidad de perros diferentes: "
-        f"{probabilidad_diferente * 100:.2f}%"
+        f"Similitud: {similitud * 100:.2f}%"
     )
-
 
 # --------------------------------------------------
 # Obtener candidatos
@@ -313,6 +301,47 @@ def obtener_probabilidad_mismo(imagen1, imagen2):
     )
 
     return float(similitud)
+
+# --------------------------------------------------
+# Vectores con caché
+# --------------------------------------------------
+
+_cache_vectores = {}
+
+
+def calcular_vector(imagen):
+
+    extractor = modelo_final.get_layer("extractor_128")
+
+    return extractor(
+        preparar_imagen(imagen),
+        training=False
+    ).numpy()[0]
+
+
+def obtener_vector_candidato(ruta):
+
+    clave = (str(ruta), ruta.stat().st_mtime)
+
+    if clave not in _cache_vectores:
+        _cache_vectores[clave] = calcular_vector(
+            cargar_candidato(ruta)
+        )
+
+    return _cache_vectores[clave]
+
+
+def similitud_coseno(vector1, vector2):
+
+    norma1 = np.linalg.norm(vector1)
+    norma2 = np.linalg.norm(vector2)
+
+    if norma1 == 0 or norma2 == 0:
+        return 0.0
+
+    similitud = np.dot(vector1, vector2) / (norma1 * norma2)
+
+    return float(np.clip(similitud, 0.0, 1.0))
 
 # --------------------------------------------------
 # Convertir imagen a Data URI
@@ -566,19 +595,17 @@ def buscar_coincidencias(imagen_perdido):
             generar_tarjetas([])
         )
 
+    vector_perdido = calcular_vector(imagen_perdido)
+
     resultados = []
 
     for ruta in candidatos:
 
         try:
 
-            imagen_candidato = cargar_candidato(
-                ruta
-            )
-
-            probabilidad = obtener_probabilidad_mismo(
-                imagen_perdido,
-                imagen_candidato
+            probabilidad = similitud_coseno(
+                vector_perdido,
+                obtener_vector_candidato(ruta)
             )
 
             resultados.append(

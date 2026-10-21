@@ -177,8 +177,8 @@ En una etapa anterior del proyecto se probó **MobileNetV2** con pesos preentren
 Ese experimento se conserva en:
 
 ```text
-model/modelo_perros_bolivar_final.keras
-model/modelo_perros_bolivar_12000_app.keras
+experimentos/mobilenet_preentrenado/modelo_perros_bolivar_final.keras
+experimentos/mobilenet_preentrenado/modelo_perros_bolivar_12000_app.keras
 ```
 
 El agente **no debe usar transfer learning ni redes preentrenadas en el modelo entregado**, porque la consigna del trabajo lo prohíbe.
@@ -361,8 +361,8 @@ model/modelo_perros_bolivar_scratch.keras
 Los modelos del experimento de comparación (MobileNetV2) son:
 
 ```text
-model/modelo_perros_bolivar_final.keras
-model/modelo_perros_bolivar_12000_app.keras
+experimentos/mobilenet_preentrenado/modelo_perros_bolivar_final.keras
+experimentos/mobilenet_preentrenado/modelo_perros_bolivar_12000_app.keras
 ```
 
 ### Procedimiento recomendado
@@ -508,7 +508,7 @@ La aplicación carga `modelo_perros_bolivar_scratch.keras`, calcula la similitud
 Para ejecutarla:
 
 ```bash
-python src/app.py
+python -m src.app
 ```
 
 ## Pruebas
@@ -517,6 +517,7 @@ Las pruebas se encuentran en:
 
 ```text
 tests/test_app.py
+tests/test_db.py
 ```
 
 Para ejecutarlas:
@@ -536,6 +537,7 @@ El agente no debe:
 - Entrenar utilizando datos de prueba.
 - Elegir umbrales utilizando datos de prueba.
 - Incorporar redes o pesos preentrenados al modelo entregado.
+- Utilizar, ejecutar o modificar los archivos de `experimentos/` como parte de la entrega.
 - Inventar métricas.
 - Inventar resultados de experimentos.
 - Eliminar datos sin autorización.

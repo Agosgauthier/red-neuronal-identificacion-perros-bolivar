@@ -163,8 +163,8 @@ Los umbrales (0,15 y 0,90) se eligieron con datos de validación, no con los de 
 
 Modelos del experimento de comparación (MobileNetV2), que la aplicación ya no usa:
 
-- `model/modelo_perros_bolivar_final.keras`: Accuracy 82,15 % | F1-score 82,83 %.
-- `model/modelo_perros_bolivar_12000_app.keras`: Accuracy 87,81 % | F1-score 88,30 % (1.600 pares, umbral 0,76).
+- `experimentos/mobilenet_preentrenado/modelo_perros_bolivar_final.keras`: Accuracy 82,15 % | F1-score 82,83 %.
+- `experimentos/mobilenet_preentrenado/modelo_perros_bolivar_12000_app.keras`: Accuracy 87,81 % | F1-score 88,30 % (1.600 pares, umbral 0,76).
 
 ---
 
@@ -228,26 +228,42 @@ Visual Studio Code se utiliza para:
 ```text
 red-neuronal-identificacion-perros-bolivar/
 │
+├── .github/workflows/
+│   └── ci.yml
+│
 ├── model/
-│   ├── modelo_perros_bolivar_scratch.keras
-│   ├── modelo_perros_bolivar_12000_app.keras
-│   └── modelo_perros_bolivar_final.keras
+│   └── modelo_perros_bolivar_scratch.keras
+│
+├── experimentos/
+│   └── mobilenet_preentrenado/    (versión anterior con MobileNetV2, NO es la entrega)
 │
 ├── data/
+│   ├── candidates/                (fotos candidatas de la galería)
+│   ├── found/                     (fotos de perros encontrados, no se sube a Git)
 │   ├── raw/
-│   └── processed/
+│   ├── processed/
+│   └── perros.db                  (base SQLite, no se sube a Git)
 │
 ├── notebooks/
+│   └── red_desde_cero_perros.ipynb
 │
 ├── src/
+│   ├── __init__.py
+│   ├── app.py
+│   ├── db.py
+│   ├── generar_pares.py
+│   └── migrar_json_a_sqlite.py
 │
 ├── tests/
+│   ├── test_app.py
+│   └── test_db.py
 │
 ├── README.md
 ├── AGENT.md
 ├── memoria.md
 ├── comandos.md
 ├── Skill.md
+├── requirements.txt
 └── .gitignore
 ```
 
@@ -373,6 +389,7 @@ El agente no debe:
 - Utilizar los datos de prueba para entrenar el modelo.
 - Utilizar los datos de prueba para elegir umbrales.
 - Incorporar redes o pesos preentrenados (como MobileNetV2) al modelo entregado.
+- Utilizar, ejecutar o modificar los archivos de `experimentos/` como parte de la entrega.
 - Sobrescribir un modelo funcional sin realizar una copia o comprobar la nueva versión.
 - Eliminar documentación existente sin una razón justificada.
 - Inventar resultados de entrenamiento o evaluación.
