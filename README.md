@@ -475,31 +475,44 @@ Permitir que un agente pueda:
 
 # 📁 Estructura del Proyecto
 
-```text
 red-neuronal-identificacion-perros-bolivar/
 │
+├── 📂 .github/workflows/
+│   └── 📄 ci.yml
+│
 ├── 📂 model/
-│   ├── 📄 modelo_perros_bolivar_scratch.keras
-│   ├── 📄 modelo_perros_bolivar_12000_app.keras
-│   └── 📄 modelo_perros_bolivar_final.keras
+│   └── 📄 modelo_perros_bolivar_scratch.keras
+│
+├── 📂 experimentos/
+│   └── 📂 mobilenet_preentrenado/    (versión anterior con MobileNetV2, NO es la entrega)
 │
 ├── 📂 data/
+│   ├── 📂 candidates/                (fotos candidatas de la galería)
+│   ├── 📂 found/                     (fotos de perros encontrados, no se sube a Git)
 │   ├── 📂 raw/
-│   └── 📂 processed/
+│   ├── 📂 processed/
+│   └── 📄 perros.db                  (base SQLite, no se sube a Git)
 │
 ├── 📂 notebooks/
+│   └── 📄 red_desde_cero_perros.ipynb
 │
 ├── 📂 src/
+│   ├── 📄 app.py
+│   ├── 📄 db.py
+│   ├── 📄 generar_pares.py
+│   └── 📄 migrar_json_a_sqlite.py
 │
 ├── 📂 tests/
+│   ├── 📄 test_app.py
+│   └── 📄 test_db.py
 │
 ├── 📄 README.md
 ├── 📄 AGENT.md
 ├── 📄 memoria.md
 ├── 📄 comandos.md
 ├── 📄 Skill.md
+├── 📄 requirements.txt
 └── 📄 .gitignore
-```
 
 ---
 
