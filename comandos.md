@@ -518,7 +518,7 @@ extractor = modelo.get_layer("extractor_128")
 Con el entorno virtual activado:
 
 ```bash
-python src/app.py
+python -m src.app
 ```
 
 La aplicación estará disponible en:

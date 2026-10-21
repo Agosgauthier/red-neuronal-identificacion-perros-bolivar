@@ -508,7 +508,7 @@ La aplicación carga `modelo_perros_bolivar_scratch.keras`, calcula la similitud
 Para ejecutarla:
 
 ```bash
-python src/app.py
+python -m src.app
 ```
 
 ## Pruebas
