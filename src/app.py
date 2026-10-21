@@ -108,30 +108,18 @@ def comparar_perros(imagen1, imagen2):
     if imagen1 is None or imagen2 is None:
         return "⚠️ Cargá las dos imágenes."
 
-    imagen1 = preparar_imagen(imagen1)
-    imagen2 = preparar_imagen(imagen2)
+    similitud = obtener_probabilidad_mismo(imagen1, imagen2)
 
-    prediccion = modelo_final.predict(
-        [imagen1, imagen2],
-        verbose=0
-    )[0][0]
-
-    probabilidad_mismo = float(prediccion)
-    probabilidad_diferente = 1 - probabilidad_mismo
-
-    if probabilidad_mismo >= UMBRAL_COINCIDENCIA:
+    if similitud >= UMBRAL_COINCIDENCIA:
         return (
             "🐕✅ MISMO PERRO\n\n"
-            f"Probabilidad de mismo perro: "
-            f"{probabilidad_mismo * 100:.2f}%"
+            f"Similitud: {similitud * 100:.2f}%"
         )
 
     return (
         "🐕❌ PERROS DIFERENTES\n\n"
-        f"Probabilidad de perros diferentes: "
-        f"{probabilidad_diferente * 100:.2f}%"
+        f"Similitud: {similitud * 100:.2f}%"
     )
-
 
 # --------------------------------------------------
 # Obtener candidatos
