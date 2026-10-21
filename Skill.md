@@ -517,6 +517,7 @@ Las pruebas se encuentran en:
 
 ```text
 tests/test_app.py
+tests/test_db.py
 ```
 
 Para ejecutarlas:
@@ -536,6 +537,7 @@ El agente no debe:
 - Entrenar utilizando datos de prueba.
 - Elegir umbrales utilizando datos de prueba.
 - Incorporar redes o pesos preentrenados al modelo entregado.
+- Utilizar, ejecutar o modificar los archivos de `experimentos/` como parte de la entrega.
 - Inventar métricas.
 - Inventar resultados de experimentos.
 - Eliminar datos sin autorización.

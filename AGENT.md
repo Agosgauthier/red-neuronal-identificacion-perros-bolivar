@@ -389,6 +389,7 @@ El agente no debe:
 - Utilizar los datos de prueba para entrenar el modelo.
 - Utilizar los datos de prueba para elegir umbrales.
 - Incorporar redes o pesos preentrenados (como MobileNetV2) al modelo entregado.
+- Utilizar, ejecutar o modificar los archivos de `experimentos/` como parte de la entrega.
 - Sobrescribir un modelo funcional sin realizar una copia o comprobar la nueva versión.
 - Eliminar documentación existente sin una razón justificada.
 - Inventar resultados de entrenamiento o evaluación.

@@ -450,6 +450,8 @@ Nunca eliminar el modelo funcional sin comprobar previamente la nueva versión.
 
 Nunca incorporar pesos preentrenados al modelo entregado.
 
+Nunca usar ni modificar los archivos de `experimentos/` como parte de la entrega.
+
 Mantener documentados:
 
 ```text
@@ -514,6 +516,14 @@ El proyecto cuenta actualmente con:
 
 ✅ Registro de perros encontrados implementado
 
+✅ Registros de perros encontrados guardados en SQLite (data/perros.db)
+
+✅ Caché de vectores en la búsqueda de coincidencias
+
+✅ Experimento con MobileNetV2 archivado en experimentos/mobilenet_preentrenado/ (no es la entrega)
+
+✅ Aplicación ejecutable con python -m src.app
+
 ✅ Pruebas automatizadas implementadas
 
 ✅ Repositorio creado
@@ -545,6 +555,7 @@ Limitaciones conocidas:
 
 - A veces puntúan alto perros distintos con colores parecidos.
 - Las fotos del dataset de un mismo perro se parecen mucho entre sí; con fotos reales de Bolívar el rendimiento podría ser menor.
-- La aplicación recalcula las características de cada foto candidata en cada búsqueda, por lo que no escala a miles de fotos sin guardar los vectores precalculados.
+- Los vectores de las fotos candidatas se guardan en caché mientras la aplicación está abierta, pero no hay un índice persistente: con miles de fotos la primera búsqueda tardaría mucho.
+- Con pocas fotos en la galería, los puntajes de perros distintos quedan muy juntos (en pruebas manuales, entre 92 % y 99 %) y el perro correcto no siempre queda primero.
 
 La línea base actual para próximas mejoras es el modelo final desde cero (87,55 % en pares y 54 % de acierto en primer lugar).
