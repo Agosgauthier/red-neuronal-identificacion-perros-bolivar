@@ -177,8 +177,8 @@ En una etapa anterior del proyecto se probó **MobileNetV2** con pesos preentren
 Ese experimento se conserva en:
 
 ```text
-model/modelo_perros_bolivar_final.keras
-model/modelo_perros_bolivar_12000_app.keras
+experimentos/mobilenet_preentrenado/modelo_perros_bolivar_final.keras
+experimentos/mobilenet_preentrenado/modelo_perros_bolivar_12000_app.keras
 ```
 
 El agente **no debe usar transfer learning ni redes preentrenadas en el modelo entregado**, porque la consigna del trabajo lo prohíbe.
@@ -361,8 +361,8 @@ model/modelo_perros_bolivar_scratch.keras
 Los modelos del experimento de comparación (MobileNetV2) son:
 
 ```text
-model/modelo_perros_bolivar_final.keras
-model/modelo_perros_bolivar_12000_app.keras
+experimentos/mobilenet_preentrenado/modelo_perros_bolivar_final.keras
+experimentos/mobilenet_preentrenado/modelo_perros_bolivar_12000_app.keras
 ```
 
 ### Procedimiento recomendado

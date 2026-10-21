@@ -332,8 +332,8 @@ Tamaño aproximado: 5 MB.
 Modelos del experimento de comparación (MobileNetV2), que ya no usa la aplicación:
 
 ```text
-model/modelo_perros_bolivar_12000_app.keras
-model/modelo_perros_bolivar_final.keras
+experimentos/mobilenet_preentrenado/modelo_perros_bolivar_12000_app.keras
+experimentos/mobilenet_preentrenado/modelo_perros_bolivar_final.keras
 ```
 
 ---

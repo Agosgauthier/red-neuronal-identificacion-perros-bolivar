@@ -163,8 +163,8 @@ Los umbrales (0,15 y 0,90) se eligieron con datos de validación, no con los de 
 
 Modelos del experimento de comparación (MobileNetV2), que la aplicación ya no usa:
 
-- `model/modelo_perros_bolivar_final.keras`: Accuracy 82,15 % | F1-score 82,83 %.
-- `model/modelo_perros_bolivar_12000_app.keras`: Accuracy 87,81 % | F1-score 88,30 % (1.600 pares, umbral 0,76).
+- `experimentos/mobilenet_preentrenado/modelo_perros_bolivar_final.keras`: Accuracy 82,15 % | F1-score 82,83 %.
+- `experimentos/mobilenet_preentrenado/modelo_perros_bolivar_12000_app.keras`: Accuracy 87,81 % | F1-score 88,30 % (1.600 pares, umbral 0,76).
 
 ---
 

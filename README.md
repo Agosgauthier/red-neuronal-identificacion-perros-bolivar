@@ -407,7 +407,7 @@ El proyecto contiene los siguientes modelos:
 - `model/modelo_perros_bolivar_scratch.keras`  
   **Modelo final del proyecto.** Red siamesa con CNN propia, sin redes preentrenadas. Es el que utiliza la aplicación: extrae características mediante `extractor_128` y realiza la búsqueda por similitud.
 
-- `model/modelo_perros_bolivar_12000_app.keras` y `model/modelo_perros_bolivar_final.keras`  
+- `experimentos/mobilenet_preentrenado/modelo_perros_bolivar_12000_app.keras` y `experimentos/mobilenet_preentrenado/modelo_perros_bolivar_final.keras`  
   Modelos del experimento de comparación con MobileNetV2.
 
 Todos los modelos utilizan el formato:
