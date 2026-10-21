@@ -6,6 +6,8 @@ Este archivo define las habilidades y procedimientos que puede utilizar el agent
 
 El objetivo es facilitar la ejecución de tareas relacionadas con datos, entrenamiento, evaluación, documentación y mantenimiento del proyecto.
 
+**Consigna del trabajo:** la red neuronal entregada se construye y entrena **desde cero, sin redes preentrenadas**.
+
 ---
 
 # 🎯 Objetivo
@@ -15,8 +17,9 @@ Las habilidades del agente están orientadas a:
 - Analizar la estructura del proyecto.
 - Preparar y procesar datos.
 - Trabajar con imágenes.
-- Entrenar modelos de redes neuronales.
+- Construir y entrenar redes neuronales desde cero.
 - Evaluar modelos.
+- Ajustar umbrales de decisión.
 - Analizar resultados.
 - Realizar mejoras iterativas.
 - Gestionar modelos entrenados.
@@ -44,7 +47,7 @@ El agente debe poder trabajar con datasets de imágenes y mantener separados los
 
 ### Regla
 
-Los datos de prueba no deben utilizarse durante el entrenamiento.
+Los datos de prueba no deben utilizarse durante el entrenamiento ni para elegir umbrales.
 
 ---
 
@@ -65,7 +68,7 @@ Conversión RGB
       ↓
 Redimensionamiento
       ↓
-Normalización
+Normalización (dividir por 255)
       ↓
 Entrada del modelo
 ```
@@ -98,6 +101,7 @@ Labels:
 
 ### Configuración actual
 
+```text
 400 perros → entrenamiento
 100 perros → prueba
 
@@ -105,6 +109,9 @@ Labels:
 2.000 pares → prueba
 
 Total: 10.000 pares
+```
+
+Del entrenamiento, el 20 % se reserva como validación.
 
 ---
 
@@ -116,7 +123,7 @@ Dos imágenes pertenecientes al mismo identificador de perro.
 
 Dos imágenes pertenecientes a identificadores de perros diferentes.
 
-El agente debe mantener una distribución equilibrada cuando el experimento lo requiera.
+El agente debe mantener una distribución equilibrada (50 % y 50 %) cuando el experimento lo requiera.
 
 ---
 
@@ -124,7 +131,7 @@ El agente debe mantener una distribución equilibrada cuando el experimento lo r
 
 ## Arquitectura utilizada
 
-El proyecto utiliza una **Siamese Network**.
+El proyecto utiliza una **Siamese Network** con una **CNN propia creada desde cero**.
 
 Cada imagen pasa por el mismo extractor de características.
 
@@ -136,77 +143,68 @@ Imagen 1 ──► Extractor ──► Vector 1
 Imagen 2 ──► Extractor ──► Vector 2
 ```
 
-El extractor utilizado actualmente es:
+El extractor (`extractor_128`) tiene esta estructura:
 
 ```text
-MobileNetV2
+Imagen 128 × 128 × 3
+   ↓
+RandomFlip · RandomRotation · RandomZoom   (solo al entrenar)
+   ↓
+4 bloques: Conv2D → BatchNormalization → ReLU → MaxPooling
+           (32, 64, 128 y 256 filtros)
+   ↓
+GlobalAveragePooling2D → Dropout(0.3) → Dense(128, ReLU)
+   ↓
+Vector de características (huella del perro)
 ```
 
-con pesos preentrenados sobre ImageNet.
+La comparación se realiza así:
+
+```text
+|Vector 1 - Vector 2| → Dense(64, ReLU) → Dense(1, Sigmoid)
+```
+
+Parámetros totales: 431.073.
+
+Todos los pesos se inicializan al azar y se aprenden durante el entrenamiento. **No se utilizan pesos preentrenados.**
 
 ---
 
-# 🔬 Transfer Learning
+# 🔬 Experimento de comparación: Transfer Learning
 
-El agente puede utilizar modelos preentrenados para aprovechar características aprendidas previamente.
+En una etapa anterior del proyecto se probó **MobileNetV2** con pesos preentrenados sobre ImageNet, con y sin fine-tuning, únicamente como **comparación**.
 
-En este proyecto se utiliza:
-
-```text
-MobileNetV2
-```
-
-como extractor de características.
-
-La red puede mantenerse congelada durante una primera etapa y posteriormente utilizarse fine-tuning.
-
----
-
-# 🛠️ Fine-tuning
-
-## Descripción
-
-El fine-tuning permite adaptar parte de un modelo preentrenado al problema específico.
-
-### Configuración utilizada
+Ese experimento se conserva en:
 
 ```text
-Capas finales entrenables
-Learning rate: 0.00001
-Épocas: 5
+model/modelo_perros_bolivar_final.keras
+model/modelo_perros_bolivar_12000_app.keras
 ```
 
-### Procedimiento
+El agente **no debe usar transfer learning ni redes preentrenadas en el modelo entregado**, porque la consigna del trabajo lo prohíbe.
 
-```text
-Modelo preentrenado
-        ↓
-Congelar la mayor parte
-        ↓
-Descongelar capas finales
-        ↓
-Learning rate pequeño
-        ↓
-Reentrenamiento
-        ↓
-Evaluación
-```
+Los resultados de ese experimento no son estrictamente comparables con los del modelo final, porque se midieron con conjuntos de perros y pares distintos.
 
 ---
 
 # ⚙️ Entrenamiento
 
-El agente debe poder ayudar a configurar y ejecutar procesos de entrenamiento.
+El agente debe poder ayudar a configurar y ejecutar procesos de entrenamiento, en Google Colab con GPU.
 
 ### Parámetros actuales
 
 ```text
+Optimizador: Adam
+Learning rate inicial: 0.001
+Pérdida: binary_crossentropy
 Batch size: 32
-Learning rate inicial: 0.0001
-Learning rate fine-tuning: 0.00001
-Épocas iniciales: 10
-Épocas fine-tuning: 5
+Validación: 20 % del entrenamiento
+Épocas máximas: 40
+EarlyStopping: val_loss, paciencia 5, restaura mejores pesos
+ReduceLROnPlateau: factor 0.5, paciencia 3, mínimo 1e-6
 ```
+
+En el entrenamiento final, el proceso se detuvo en la época 14 y se conservaron los pesos de la época 9.
 
 ### Métrica principal
 
@@ -221,6 +219,33 @@ Precision
 Recall
 F1-score
 ```
+
+---
+
+# 🎚️ Ajuste de Umbrales
+
+El agente debe poder elegir umbrales de decisión **usando datos de validación**, nunca los datos de prueba.
+
+```text
+Umbral de la salida de la red: 0,15
+Umbral de similitud coseno (aplicación): 0,90
+```
+
+Procedimiento:
+
+```text
+Calcular predicciones sobre validación
+        ↓
+Probar distintos umbrales
+        ↓
+Elegir el de mayor F1-score
+        ↓
+Aplicarlo sobre los datos de prueba
+        ↓
+Registrar los resultados
+```
+
+Cuando se entrene un modelo nuevo, el umbral debe recalcularse y actualizarse en `src/app.py` (`UMBRAL_COINCIDENCIA`).
 
 ---
 
@@ -247,11 +272,29 @@ Datos de prueba
        ↓
 Predicciones
        ↓
-Conversión a clases
+Conversión a clases (con el umbral elegido en validación)
        ↓
 Métricas
        ↓
 Análisis
+```
+
+### Evaluación como buscador
+
+Además de evaluar pares, se mide qué tan bien funciona el sistema buscando un perro entre muchos: se registra una foto de cada perro y se busca con otra foto distinta del mismo perro.
+
+```text
+Resultado del modelo final (100 perros):
+Primer lugar:          54 de 100
+Entre los 3 primeros:  77 de 100
+Entre los 5 primeros:  78 de 100
+```
+
+### Resultados del modelo final (2.000 pares de prueba)
+
+```text
+Similitud coseno, umbral 0,90:
+Accuracy 87,55 % | Precision 89,24 % | Recall 85,40 % | F1-score 87,28 %
 ```
 
 ---
@@ -291,6 +334,7 @@ El agente debe analizar:
 - Posible sobreajuste.
 - Efecto de cambios en los datos.
 - Efecto de cambios en la arquitectura.
+- Efecto del umbral elegido.
 
 Debe distinguir entre:
 
@@ -308,7 +352,13 @@ Mejora aparente
 
 # 💾 Gestión de Modelos
 
-Los modelos del proyecto se encuentran en:
+El modelo final del proyecto, usado por la aplicación, es:
+
+```text
+model/modelo_perros_bolivar_scratch.keras
+```
+
+Los modelos del experimento de comparación (MobileNetV2) son:
 
 ```text
 model/modelo_perros_bolivar_final.keras
@@ -326,12 +376,20 @@ Entrenar nueva versión
        ↓
 Evaluar
        ↓
+Recalcular el umbral de similitud
+       ↓
 Comparar resultados
        ↓
 Conservar la mejor versión
 ```
 
 El modelo no debe sobrescribirse sin comprobar la nueva versión.
+
+Nota sobre Git: el archivo `.gitignore` ignora los archivos `.keras`. Para subir un modelo nuevo hay que agregarlo de forma forzada:
+
+```bash
+git add -f model/nombre_del_modelo.keras
+```
 
 ---
 
@@ -357,8 +415,11 @@ Es el entorno principal para:
 
 - Entrenamiento.
 - Evaluación.
+- Ajuste de umbrales.
 - Experimentación.
 - Procesamiento de datos.
+
+Colab borra la memoria al reiniciarse, por lo que hay que volver a ejecutar las celdas de preparación (dataset, pares y modelo).
 
 ## Visual Studio Code
 
@@ -442,7 +503,9 @@ Archivo principal:
 src/app.py
 ```
 
-Para ejecutar la aplicación:
+La aplicación carga `modelo_perros_bolivar_scratch.keras`, calcula la similitud coseno sobre la capa `extractor_128` y usa el umbral 0,90.
+
+Para ejecutarla:
 
 ```bash
 python src/app.py
@@ -471,6 +534,8 @@ El agente debe comprobar que las pruebas continúen funcionando después de real
 El agente no debe:
 
 - Entrenar utilizando datos de prueba.
+- Elegir umbrales utilizando datos de prueba.
+- Incorporar redes o pesos preentrenados al modelo entregado.
 - Inventar métricas.
 - Inventar resultados de experimentos.
 - Eliminar datos sin autorización.
