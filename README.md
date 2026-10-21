@@ -473,6 +473,57 @@ Permitir que un agente pueda:
 
 ---
 
+# 🗄️ Base de Datos
+
+Los perros encontrados se registran en una base de datos **SQLite** local (`data/perros.db`), en la tabla `perros_encontrados`:
+
+| Campo | Contenido |
+|---|---|
+| `id` | Identificador del registro (automático) |
+| `imagen` | Nombre del archivo de la fotografía guardada en `data/found/` |
+| `zona` | Lugar donde se encontró el perro |
+| `fecha` | Fecha en la que se encontró |
+| `descripcion` | Descripción opcional |
+| `contacto` | Medio de contacto de quien lo encontró |
+| `fecha_registro` | Fecha y hora del registro en la aplicación |
+
+El módulo `src/db.py` ofrece las funciones `inicializar_base_datos()`, `registrar_perro()`, `obtener_perro_por_imagen()` y `obtener_perros()`. La aplicación crea la base automáticamente la primera vez que se registra un perro.
+
+La base de datos y las fotografías de `data/found/` **no se suben a GitHub** (están en el `.gitignore`), porque contienen datos de contacto de personas. Si existiera un archivo `data/found/datos.json` de una versión anterior, sus registros se pasan a SQLite con:
+
+```bash
+python -m src.migrar_json_a_sqlite
+```
+
+---
+
+# 🧪 Experimentos Previos (MobileNetV2)
+
+La carpeta `experimentos/mobilenet_preentrenado/` guarda una versión anterior del proyecto basada en **MobileNetV2 preentrenada** (transfer learning), con sus scripts, su notebook y sus modelos.
+
+Se conserva únicamente como comparación. **No forma parte de la entrega**: el modelo entregado es una red siamesa con CNN propia, creada y entrenada desde cero, sin redes preentrenadas (`model/modelo_perros_bolivar_scratch.keras`, notebook `notebooks/red_desde_cero_perros.ipynb`).
+
+---
+
+# ▶️ Cómo Ejecutar la Aplicación
+
+Desde la raíz del proyecto, con el entorno virtual activado:
+
+```bash
+pip install -r requirements.txt
+python -m src.app
+```
+
+La aplicación se abre en `http://127.0.0.1:7860`. Se ejecuta como módulo (`-m`) para que funcionen los imports internos del proyecto.
+
+Para correr las pruebas:
+
+```bash
+python -m unittest discover -s tests -p "test_*.py" -v
+```
+
+---
+
 # 📁 Estructura del Proyecto
 
 red-neuronal-identificacion-perros-bolivar/
