@@ -1,8 +1,13 @@
 from pathlib import Path
 import base64
 import html
-import json
 from datetime import datetime
+
+from src.db import (
+    inicializar_base_datos,
+    registrar_perro,
+    obtener_perro_por_imagen,
+)
 
 from PIL import Image
 
@@ -42,13 +47,6 @@ RUTA_ENCONTRADOS = (
     BASE_DIR
     / "data"
     / "found"
-)
-
-RUTA_DATOS_ENCONTRADOS = (
-    BASE_DIR
-    / "data"
-    / "found"
-    / "datos.json"
 )
 
 UMBRAL_COINCIDENCIA = 0.90
@@ -179,6 +177,7 @@ def obtener_candidatos():
 # Registrar perro encontrado
 # --------------------------------------------------
 
+
 def registrar_perro_encontrado(
     imagen,
     zona,
@@ -186,7 +185,6 @@ def registrar_perro_encontrado(
     descripcion,
     contacto
 ):
-
     if imagen is None:
         return "⚠️ Primero cargá una fotografía del perro."
 
@@ -207,7 +205,6 @@ def registrar_perro_encontrado(
     fecha_registro = datetime.now()
 
     nombre_archivo = (
-
         "encontrado_"
         + fecha_registro.strftime("%Y%m%d_%H%M%S")
         + ".jpg"
@@ -221,45 +218,27 @@ def registrar_perro_encontrado(
 
     imagen_guardar.save(ruta_imagen, "JPEG")
 
-    datos = []
+    try:
+        inicializar_base_datos()
 
-    if RUTA_DATOS_ENCONTRADOS.exists():
+        registrar_perro(
+            imagen=nombre_archivo,
+            zona=zona.strip(),
+            fecha=fecha.strip(),
+            descripcion=descripcion.strip() if descripcion else "",
+            contacto=contacto.strip(),
+            fecha_registro=fecha_registro.isoformat()
+        )
 
-        try:
-            with open(
-                RUTA_DATOS_ENCONTRADOS,
-                "r",
-                encoding="utf-8"
-            ) as archivo:
-                datos = json.load(archivo)
+    except Exception as error:
+        if ruta_imagen.exists():
+            ruta_imagen.unlink()
 
-        except Exception:
-            datos = []
+        print(f"Error al registrar el perro en SQLite: {error}")
 
-    datos.append(
-        {
-            "imagen": nombre_archivo,
-            "zona": zona.strip(),
-
-            "fecha": fecha.strip(),
-            "descripcion": (
-                descripcion.strip() if descripcion else ""
-            ),
-            "contacto": contacto.strip(),
-            "fecha_registro": fecha_registro.isoformat()
-        }
-    )
-
-    with open(
-        RUTA_DATOS_ENCONTRADOS,
-        "w",
-        encoding="utf-8"
-    ) as archivo:
-        json.dump(
-            datos,
-            archivo,
-            ensure_ascii=False,
-            indent=4
+        return (
+            "❌ No se pudieron guardar los datos del perro. "
+            "Intentá nuevamente."
         )
 
     return (
@@ -397,30 +376,10 @@ HERO_IMAGE = obtener_imagen_decorativa()
 # --------------------------------------------------
 
 def obtener_datos_encontrado(ruta):
-
     if not ruta.is_relative_to(RUTA_ENCONTRADOS):
         return None
 
-    if not RUTA_DATOS_ENCONTRADOS.exists():
-        return None
-
-    try:
-        with open(
-            RUTA_DATOS_ENCONTRADOS,
-            "r",
-            encoding="utf-8"
-        ) as archivo:
-            datos = json.load(archivo)
-
-    except Exception:
-        return None
-
-    for registro in datos:
-
-        if registro.get("imagen") == ruta.name:
-            return registro
-
-    return None
+    return obtener_perro_por_imagen(ruta.name)
 
 # --------------------------------------------------
 # Generar tarjetas

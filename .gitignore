@@ -49,3 +49,13 @@ dataset/
 
 # Modelos grandes
 *.keras
+
+# Modelo principal entrenado desde cero: permitirlo aunque exista *.keras
+!model/modelo_perros_bolivar_scratch.keras
+
+# Base de datos local: no subir registros personales
+data/perros.db
+
+# Registros de perros encontrados: conservar solo la carpeta
+data/found/*
+!data/found/.gitkeep
