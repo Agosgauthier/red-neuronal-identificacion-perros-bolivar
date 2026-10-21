@@ -2,7 +2,7 @@
 
 ## Proyecto de Redes Neuronales
 
-**Sistema de comparación de imágenes basado en una red Siamese para identificar posibles coincidencias de un perro perdido entre fotografías candidatas.**
+**Sistema de comparación de imágenes basado en una red Siamese con CNN propia (sin redes preentrenadas) para identificar posibles coincidencias de un perro perdido entre fotografías candidatas.**
 
 ---
 
@@ -28,7 +28,6 @@ El proyecto utiliza una arquitectura de tipo **Siamese Network**, orientada a co
 - Python
 - TensorFlow
 - Keras
-- MobileNetV2
 - OpenCV
 - NumPy
 - Pandas
@@ -43,11 +42,11 @@ El proyecto utiliza una arquitectura de tipo **Siamese Network**, orientada a co
 ## Funcionamiento
 
 ```text
-                    ┌──► MobileNetV2 ──► Vector 1 ──┐
+                    ┌──► CNN propia ──► Vector 1 ──┐
 📷 Imagen 1 ────────┤                                │
                     │                                ├──► Comparación ──► Resultado
 📷 Imagen 2 ────────┤                                │
-                    └──► MobileNetV2 ──► Vector 2 ──┘
+                    └──► CNN propia ──► Vector 2 ──┘
 ```
 
 ### Resultado
@@ -96,45 +95,60 @@ YT-BB-Dog/
 
 Se implementó una **Siamese Network** para comparar dos fotografías.
 
-Como extractor de características se utilizó **MobileNetV2** con pesos preentrenados sobre ImageNet.
+Como extractor de características se construyó una **red convolucional (CNN) propia, creada desde cero**. **No se utilizó ninguna red preentrenada**: todos los pesos parten de valores aleatorios y se aprenden con el dataset del proyecto.
 
-Posteriormente se realizó **fine-tuning** sobre las últimas capas de la red para adaptar el modelo al problema específico de identificación de perros.
-
-## Extracción de características
+## Extracción de características (`extractor_128`)
 
 ```text
-Imagen
+Imagen 128 × 128 × 3
    ↓
-Rescaling
+RandomFlip · RandomRotation · RandomZoom   (solo durante el entrenamiento)
    ↓
-MobileNetV2
+Bloque 1:  Conv2D(32)  → BatchNormalization → ReLU → MaxPooling
+   ↓
+Bloque 2:  Conv2D(64)  → BatchNormalization → ReLU → MaxPooling
+   ↓
+Bloque 3:  Conv2D(128) → BatchNormalization → ReLU → MaxPooling
+   ↓
+Bloque 4:  Conv2D(256) → BatchNormalization → ReLU → MaxPooling
    ↓
 GlobalAveragePooling2D
    ↓
-Dense(128)
+Dropout(0.3)
    ↓
-Vector de características
+Dense(128, ReLU)
+   ↓
+Vector de características (la "huella" del perro)
 ```
 
-Las dos imágenes utilizan la misma red para obtener representaciones comparables.
+Las dos imágenes utilizan **la misma red con los mismos pesos**, para obtener representaciones comparables.
 
 ## Comparación de imágenes
 
 ```text
 Vector 1 ─────┐
               │
-              ├──► Diferencia absoluta
+              ├──► Diferencia absoluta (capa AbsDifference)
               │
 Vector 2 ─────┘
                        ↓
-                   Dense(64)
+                Dense(64, ReLU)
                        ↓
-                    Dense(1)
+                Dense(1, Sigmoid)
                        ↓
-                    Sigmoid
-                       ↓
-                  0 o 1
+              Probabilidad (0 a 1)
 ```
+
+## Parámetros del modelo
+
+| Parte | Parámetros |
+|---|---:|
+| `extractor_128` | 422.752 |
+| `comparacion` (Dense 64) | 8.256 |
+| `salida` (Dense 1) | 65 |
+| **Total** | **431.073** |
+
+Entrenables: 430.113. No entrenables: 960 (estadísticas de BatchNormalization).
 
 ---
 
@@ -146,16 +160,16 @@ Las imágenes fueron redimensionadas a:
 128 × 128 píxeles
 ```
 
-Los valores de los píxeles fueron normalizados antes de ingresar al modelo.
+Los valores de los píxeles fueron normalizados dividiéndolos por 255.
 
 ## Dataset experimental final
 
 ```text
 400 perros → entrenamiento
-100 perros  → prueba
+100 perros → prueba
 
 8.000 pares → entrenamiento
-2.000 pares   → prueba
+2.000 pares → prueba
 
 Total: 10.000 pares de fotografías
 ```
@@ -167,16 +181,25 @@ Los pares fueron balanceados:
 50 % → perros diferentes
 ```
 
+Los perros del conjunto de prueba **no se usan durante el entrenamiento**. Además, el 20 % de los pares de entrenamiento se reserva como validación.
+
 ## Parámetros principales
 
 ```text
-Tamaño de imagen:             128 × 128
-Batch size:                   32
-Learning rate inicial:        0.0001
-Learning rate fine-tuning:    0.00001
-Épocas iniciales:             10
-Épocas fine-tuning:           5
+Tamaño de imagen:        128 × 128
+Optimizador:             Adam
+Learning rate inicial:   0.001
+Función de pérdida:      binary_crossentropy
+Batch size:              32
+Validación:              20 % del entrenamiento
+Épocas máximas:          40
+EarlyStopping:           monitorea val_loss, paciencia 5, restaura los mejores pesos
+ReduceLROnPlateau:       factor 0.5, paciencia 3, mínimo 1e-6
 ```
+
+## Resultado del entrenamiento
+
+El entrenamiento se detuvo automáticamente en la época 14 (EarlyStopping). Se conservaron los pesos de la época 9, con 75,94 % de accuracy de validación.
 
 ---
 
@@ -193,26 +216,45 @@ Las fotografías se ordenan de mayor a menor similitud y se muestran las princip
 Para evitar presentar como coincidencia una fotografía con una similitud demasiado baja, se estableció un límite de:
 
 ```text
-0,76 → 76 %
+0,90 → 90 %
 ```
+
+Este valor se eligió buscando el mayor F1-score sobre datos de validación (los últimos 1.600 pares del entrenamiento), no sobre los datos de prueba.
 
 Si la mayor similitud encontrada es inferior a este valor, la aplicación informa que no se encontró una coincidencia suficientemente alta.
 
 ## Evaluación de la búsqueda por similitud
 
-Se evaluaron **1.600 pares de fotografías**:
+Se evaluaron los **2.000 pares de prueba** (perros que el modelo nunca vio), con el límite de 0,90:
 
 ```text
-800 pares → mismo perro
-800 pares → perros diferentes
+1.000 pares → mismo perro
+1.000 pares → perros diferentes
 ```
 
 | Métrica | Resultado |
 |---|---:|
-| **Accuracy** | **87,81 %** |
-| **Precision** | **84,89 %** |
-| **Recall** | **92,00 %** |
-| **F1-score** | **88,30 %** |
+| **Accuracy** | **87,55 %** |
+| **Precision** | **89,24 %** |
+| **Recall** | **85,40 %** |
+| **F1-score** | **87,28 %** |
+
+```text
+[[897 103]
+ [146 854]]
+```
+
+## Evaluación como buscador
+
+Además de comparar pares, se midió qué tan bien funciona el sistema como buscador. Se tomaron **100 perros del conjunto de prueba**, se registró una fotografía de cada uno y se buscó con **otra fotografía distinta del mismo perro**:
+
+| Posición del perro correcto | Resultado | Al azar sería |
+|---|---:|---:|
+| Primer lugar | 54 de 100 | 1 |
+| Entre los 3 primeros | 77 de 100 | 3 |
+| Entre los 5 primeros | 78 de 100 | 5 |
+
+Aclaración: en el dataset, las fotografías de un mismo perro suelen ser muy parecidas entre sí, por lo que con fotografías reales de Bolívar el resultado podría ser menor.
 
 ---
 
@@ -228,30 +270,32 @@ El modelo fue evaluado utilizando:
 
 El conjunto de prueba contiene perros que **no fueron utilizados durante el entrenamiento**.
 
-## Resultados de una versión anterior
+## Clasificador (salida final de la red)
 
-| Métrica | Resultado |
-|---|---:|
-| **Accuracy** | **72,13 %** |
-| **Precision** | **72,18 %** |
-| **Recall** | **72,00 %** |
-| **F1-score** | **72,09 %** |
+El umbral de decisión por defecto (0,5) no era adecuado para este modelo: casi no daba falsos positivos, pero dejaba pasar más de la mitad de los pares del mismo perro. Se buscó un umbral mejor usando datos de validación.
 
-## Matriz de Confusión
+| Métrica | Umbral 0,5 | Umbral 0,15 |
+|---|---:|---:|
+| **Accuracy** | 71,85 % | **87,55 %** |
+| **Precision** | 98,23 % | 88,20 % |
+| **Recall** | 44,50 % | **86,70 %** |
+| **F1-score** | 61,25 % | **87,44 %** |
+
+## Matriz de Confusión (umbral 0,15)
 
 ```text
-[[289 111]
- [112 288]]
+[[884 116]
+ [133 867]]
 ```
 
 ### Interpretación
 
 ```text
-289 → perros diferentes correctamente clasificados
-111 → perros diferentes clasificados como mismo perro
+884 → perros diferentes correctamente clasificados
+116 → perros diferentes clasificados como mismo perro
 
-112 → pares del mismo perro clasificados como diferentes
-288 → pares del mismo perro correctamente clasificados
+133 → pares del mismo perro clasificados como diferentes
+867 → pares del mismo perro correctamente clasificados
 ```
 
 ---
@@ -280,7 +324,7 @@ Este proceso permitió comparar diferentes estrategias y mejorar progresivamente
 
 # 1️⃣ Modelo Inicial — CNN
 
-La primera versión utilizó una red convolucional creada desde cero para analizar las imágenes.
+La primera versión utilizó una red convolucional creada desde cero (Conv2D 32 → 64 → 128, MaxPooling y Dense 128), entrenada con un conjunto muy pequeño: 16 perros para entrenar y 4 para probar.
 
 Resultado obtenido:
 
@@ -288,24 +332,24 @@ Resultado obtenido:
 Accuracy: 56,25 %
 ```
 
-El modelo presentó dificultades para reconocer correctamente los pares correspondientes al mismo perro.
+El modelo presentó dificultades para reconocer correctamente los pares correspondientes al mismo perro. Con tan pocos perros, la red no tenía suficientes datos para aprender.
 
 ---
 
-# 2️⃣ Transfer Learning — MobileNetV2
+# 2️⃣ Experimento de comparación — MobileNetV2
 
-Se reemplazó la CNN inicial por **MobileNetV2** con pesos preentrenados.
+Como experimento se reemplazó la CNN inicial por **MobileNetV2** con pesos preentrenados (transfer learning), y luego se realizó fine-tuning de sus últimas capas.
 
-La utilización de características visuales previamente aprendidas permitió construir una representación más robusta de las imágenes.
-
-Resultado:
+Resultados obtenidos en ese experimento:
 
 ```text
-Accuracy: 56,25 %
-F1-score: 58,82 %
+Con MobileNetV2 congelada:   Accuracy 56,25 %   F1-score 58,82 %
+Con más datos:               Accuracy 69,25 %   F1-score 68,94 %
+Con fine-tuning:             Accuracy 82,15 %   F1-score 82,83 %
+Búsqueda por similitud:      Accuracy 87,81 %   F1-score 88,30 %  (1.600 pares)
 ```
 
-Aunque algunas métricas mejoraron, el rendimiento general todavía no era suficiente.
+Este experimento se conserva **solo como comparación**. Por la consigna del trabajo, el modelo entregado no utiliza redes preentrenadas. Las pruebas se hicieron con distintos conjuntos de perros y de pares, por lo que los números no son estrictamente comparables con los del modelo final.
 
 ---
 
@@ -321,59 +365,52 @@ Se amplió el conjunto experimental utilizando:
 2.000 pares → prueba
 ```
 
-Resultado:
-
-```text
-Accuracy: 69,25 %
-F1-score: 68,94 %
-```
-
 El aumento de datos permitió mejorar la capacidad de generalización del modelo.
 
 ---
 
-# 4️⃣ Fine-tuning
+# 4️⃣ Modelo Final — CNN propia mejorada
 
-Se descongelaron las últimas capas de MobileNetV2 para permitir que el modelo se adaptara mejor a las características específicas del problema.
+Se construyó nuevamente una red desde cero, esta vez con:
 
-Se utilizó un learning rate menor:
+- 4 bloques de convolución con BatchNormalization.
+- Dropout y aumento de datos (volteo, rotación y zoom).
+- Un dataset mayor (8.000 pares de entrenamiento).
+- Entrenamiento con EarlyStopping y reducción automática del learning rate.
+- Ajuste del umbral de decisión con datos de validación.
+
+Resultado final en perros nunca vistos:
 
 ```text
-0.00001
+Accuracy:  87,55 %
+Precision: 89,24 %
+Recall:    85,40 %
+F1-score:  87,28 %
 ```
 
-Resultado final:
+## Evolución del modelo desde cero
 
 ```text
-Accuracy: 82,15 %
-Precision: 79,80 %
-Recall: 86,10 %
-F1-score: 82,83 %
-```
-
-## Evolución del modelo
-
-```text
-56,25 %
+56,25 %   (CNN con 16 perros)
    ↓
-69,25 %
+71,85 %   (CNN mejorada, umbral 0,5)
    ↓
-82,15 %
+87,55 %   (CNN mejorada, umbral ajustado)
 ```
 
 ---
 
 # 💾 Modelos Entrenados
 
-El proyecto contiene dos modelos principales:
+El proyecto contiene los siguientes modelos:
 
-- `model/modelo_perros_bolivar_final.keras`  
-  Modelo utilizado para la clasificación binaria entre dos fotografías.
+- `model/modelo_perros_bolivar_scratch.keras`  
+  **Modelo final del proyecto.** Red siamesa con CNN propia, sin redes preentrenadas. Es el que utiliza la aplicación: extrae características mediante `extractor_128` y realiza la búsqueda por similitud.
 
-- `model/modelo_perros_bolivar_12000_app.keras`  
-  Modelo utilizado por la aplicación para extraer características mediante `extractor_128` y realizar la búsqueda por similitud.
+- `model/modelo_perros_bolivar_12000_app.keras` y `model/modelo_perros_bolivar_final.keras`  
+  Modelos del experimento de comparación con MobileNetV2.
 
-Ambos modelos utilizan el formato:
+Todos los modelos utilizan el formato:
 
 ```text
 .keras
@@ -393,7 +430,7 @@ Se utiliza para:
 - Procesamiento de imágenes.
 - Creación de pares.
 - Entrenamiento.
-- Fine-tuning.
+- Ajuste del umbral de decisión.
 - Evaluación.
 - Experimentación con diferentes modelos.
 - Exportación de los modelos entrenados.
@@ -442,6 +479,7 @@ Permitir que un agente pueda:
 red-neuronal-identificacion-perros-bolivar/
 │
 ├── 📂 model/
+│   ├── 📄 modelo_perros_bolivar_scratch.keras
 │   ├── 📄 modelo_perros_bolivar_12000_app.keras
 │   └── 📄 modelo_perros_bolivar_final.keras
 │
@@ -511,7 +549,7 @@ Entrenamiento
       ↓
 Evaluación
       ↓
-Fine-tuning
+Ajuste del umbral
       ↓
 Exportación del modelo
 ```

@@ -6,6 +6,8 @@ Este archivo contiene los principales comandos utilizados para trabajar con el p
 
 Los comandos están organizados según las tareas de configuración, ejecución, entrenamiento, evaluación y control de versiones.
 
+La red neuronal del proyecto se construye y entrena **desde cero, sin redes preentrenadas**.
+
 ---
 
 # 🐍 Entorno de Python
@@ -66,7 +68,21 @@ pip install tensorflow
 
 # 🧠 Google Colab
 
-El entrenamiento de la red neuronal se realiza en **Google Colab**.
+El entrenamiento de la red neuronal se realiza en **Google Colab**, con GPU.
+
+## Activar la GPU
+
+Menú: *Entorno de ejecución → Cambiar tipo de entorno de ejecución → GPU T4 → Guardar*.
+
+## Comprobar que la GPU está activa
+
+```python
+import tensorflow as tf
+
+print(tf.config.list_physical_devices("GPU"))
+```
+
+Debe mostrar un dispositivo `GPU:0`. Si muestra `[]`, la GPU no está activada.
 
 ## Comprobar versión de Python
 
@@ -94,17 +110,24 @@ print(tf.__version__)
 !find dataset -maxdepth 3 -type f | head -30
 ```
 
+**Importante:** Colab borra toda la memoria (variables, dataset y modelo) cuando se reinicia o se desconecta. Hay que volver a ejecutar las celdas de descarga, pares y modelo.
+
 ---
 
 # 🗂️ Dataset
 
-## Descargar el dataset
+## Descargar y extraer el dataset (en Colab)
 
-El dataset YT-BB-Dog puede descargarse directamente desde su fuente mediante:
+El dataset YT-BB-Dog se descarga y se descomprime en dos pasos, porque el ZIP contiene otro ZIP adentro:
 
-```bash
-wget -O "YT-BB-Dog.zip" "https://www.lirmm.fr/YT-BB-Dog_Sibetan/files/YT-BB-dog.zip"
+```python
+!wget -q -O "YT-BB-Dog.zip" "https://www.lirmm.fr/YT-BB-Dog_Sibetan/files/YT-BB-dog.zip"
+!unzip -q "YT-BB-Dog.zip" -d "dataset"
+!unzip -q "dataset/YT-BB-dog/YT-BB-Dog.zip" -d "dataset/perros"
+!ls dataset/perros/YT-BB-Dog
 ```
+
+Debe mostrar las carpetas `test` y `train`.
 
 ## Comprobar el archivo descargado
 
@@ -112,22 +135,34 @@ wget -O "YT-BB-Dog.zip" "https://www.lirmm.fr/YT-BB-Dog_Sibetan/files/YT-BB-dog.
 ls -lh YT-BB-Dog.zip
 ```
 
+El archivo pesa aproximadamente 583 MB.
+
 ## Verificar que el ZIP no esté corrupto
 
 ```bash
 unzip -t YT-BB-Dog.zip
 ```
 
-## Extraer el archivo
+## Contar perros e imágenes
 
-```bash
-unzip -q YT-BB-Dog.zip -d dataset
+```python
+import os
+from glob import glob
+
+base = "dataset/perros/YT-BB-Dog"
+
+for parte in ["train", "test"]:
+    ruta = os.path.join(base, parte)
+    perros = [d for d in os.listdir(ruta) if os.path.isdir(os.path.join(ruta, d))]
+    imagenes = glob(os.path.join(ruta, "*", "*.jpg"))
+    print(parte, len(perros), "perros", len(imagenes), "imágenes")
 ```
 
-## Ver archivos del dataset
+Resultado esperado:
 
-```bash
-find dataset -type f | head -30
+```text
+train: 2.000 perros, 19.932 imágenes
+test:    723 perros,  7.104 imágenes
 ```
 
 ---
@@ -142,7 +177,20 @@ Las imágenes utilizadas por el modelo se redimensionan a:
 
 y se transforman a formato RGB.
 
-Los valores de los píxeles se normalizan antes de ingresar al modelo.
+Los valores de los píxeles se dividen por 255 antes de ingresar al modelo.
+
+```python
+import cv2
+import numpy as np
+
+TAMANO = 128
+
+def cargar_imagen(ruta):
+    imagen = cv2.imread(ruta)
+    imagen = cv2.cvtColor(imagen, cv2.COLOR_BGR2RGB)
+    imagen = cv2.resize(imagen, (TAMANO, TAMANO))
+    return imagen.astype("float32") / 255.0
+```
 
 ---
 
@@ -162,74 +210,113 @@ Labels:
 1 → mismo perro
 0 → perros diferentes
 ```
+
+Configuración del experimento final:
+
+```text
 400 perros → entrenamiento
 100 perros → prueba
 
-8.000 pares → entrenamiento
-2.000 pares → prueba
+8.000 pares → entrenamiento (4.000 mismo perro + 4.000 distintos)
+2.000 pares → prueba (1.000 mismo perro + 1.000 distintos)
 
 Total: 10.000 pares
+```
+
+Se generan con 10 pares del mismo perro por cada perro seleccionado y la misma cantidad de pares de perros distintos.
 
 ## Archivos generados
 
 ```text
-dataset/pares_train.csv
-dataset/pares_test.csv
-```
-
-y para el experimento ampliado:
-
-```text
-dataset/pares_train_grande.csv
-dataset/pares_test_grande.csv
+pares/pares_train.csv
+pares/pares_test.csv
 ```
 
 ---
 
-# 🧠 Entrenamiento del Modelo
+# 🧠 Construcción del Modelo (CNN propia)
 
-El entrenamiento se realiza utilizando TensorFlow y Keras.
-
-## Entrenar el modelo
-
-El proceso se ejecuta desde Google Colab utilizando el código definido en el notebook.
-
-Ejemplo general:
+La red se construye desde cero, sin pesos preentrenados.
 
 ```python
-modelo.fit(
+import tensorflow as tf
+from tensorflow.keras import layers, Model
+
+@tf.keras.utils.register_keras_serializable(package="Perros")
+class AbsDifference(layers.Layer):
+    def call(self, inputs):
+        return tf.abs(inputs[0] - inputs[1])
+
+def bloque(x, filtros):
+    x = layers.Conv2D(filtros, 3, padding="same", use_bias=False)(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation("relu")(x)
+    x = layers.MaxPooling2D()(x)
+    return x
+
+entrada = layers.Input(shape=(128, 128, 3))
+x = layers.RandomFlip("horizontal")(entrada)
+x = layers.RandomRotation(0.05)(x)
+x = layers.RandomZoom(0.1)(x)
+
+for filtros in [32, 64, 128, 256]:
+    x = bloque(x, filtros)
+
+x = layers.GlobalAveragePooling2D()(x)
+x = layers.Dropout(0.3)(x)
+x = layers.Dense(128, activation="relu")(x)
+
+extractor = Model(entrada, x, name="extractor_128")
+
+imagen_1 = layers.Input(shape=(128, 128, 3), name="imagen_1")
+imagen_2 = layers.Input(shape=(128, 128, 3), name="imagen_2")
+
+diferencia = AbsDifference(name="diferencia")(
+    [extractor(imagen_1), extractor(imagen_2)]
+)
+x = layers.Dense(64, activation="relu", name="comparacion")(diferencia)
+salida = layers.Dense(1, activation="sigmoid", name="salida")(x)
+
+modelo = Model([imagen_1, imagen_2], salida)
+
+modelo.compile(
+    optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
+    loss="binary_crossentropy",
+    metrics=["accuracy"],
+)
+
+modelo.summary()
+```
+
+El resumen debe mostrar 431.073 parámetros en total.
+
+---
+
+# 🏋️ Entrenamiento del Modelo
+
+El entrenamiento se realiza utilizando TensorFlow y Keras, en Google Colab con GPU.
+
+```python
+callbacks = [
+    tf.keras.callbacks.EarlyStopping(
+        monitor="val_loss", patience=5, restore_best_weights=True
+    ),
+    tf.keras.callbacks.ReduceLROnPlateau(
+        monitor="val_loss", factor=0.5, patience=3, min_lr=1e-6
+    ),
+]
+
+historia = modelo.fit(
     [X1_train, X2_train],
     y_train,
     validation_split=0.2,
-    epochs=10,
+    epochs=40,
     batch_size=32,
-    shuffle=True
+    callbacks=callbacks,
 )
 ```
 
----
-
-# 🔬 Fine-tuning
-
-Para adaptar MobileNetV2 al problema específico se habilitan las últimas capas de la red.
-
-Se utiliza un learning rate reducido:
-
-```text
-0.00001
-```
-
-Ejemplo:
-
-```python
-modelo.compile(
-    optimizer=tf.keras.optimizers.Adam(
-        learning_rate=0.00001
-    ),
-    loss="binary_crossentropy",
-    metrics=["accuracy"]
-)
-```
+`EarlyStopping` detiene el entrenamiento cuando el modelo deja de mejorar y conserva los mejores pesos. En el entrenamiento final se detuvo en la época 14 y se conservó la época 9.
 
 ---
 
@@ -245,18 +332,100 @@ F1-score
 Matriz de confusión
 ```
 
-Las predicciones se convierten en clases utilizando un umbral de:
-
-```text
-0.5
-```
-
-Ejemplo:
+## Evaluar con perros nuevos
 
 ```python
-predicciones_clase = (
-    predicciones >= 0.5
-).astype(int)
+from sklearn.metrics import (
+    accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
+)
+
+predicciones = modelo.predict([X1_test, X2_test]).ravel()
+predicciones_clase = (predicciones >= 0.5).astype(int)
+
+print("Accuracy :", accuracy_score(y_test, predicciones_clase))
+print("Precision:", precision_score(y_test, predicciones_clase))
+print("Recall   :", recall_score(y_test, predicciones_clase))
+print("F1-score :", f1_score(y_test, predicciones_clase))
+print(confusion_matrix(y_test, predicciones_clase))
+```
+
+El umbral por defecto (0,5) no fue el mejor para este modelo, por eso se ajusta con datos de validación.
+
+---
+
+# 🎚️ Ajuste de Umbrales
+
+Los umbrales se eligen con **datos de validación** (los últimos 1.600 pares de entrenamiento), nunca con los datos de prueba.
+
+## Umbral de la salida de la red
+
+```python
+X1_val, X2_val, y_val = X1_train[6400:], X2_train[6400:], y_train[6400:]
+pred_val = modelo.predict([X1_val, X2_val]).ravel()
+
+mejor_umbral, mejor_f1 = 0.5, 0
+for umbral in np.arange(0.05, 0.96, 0.05):
+    f1 = f1_score(y_val, (pred_val >= umbral).astype(int))
+    if f1 > mejor_f1:
+        mejor_umbral, mejor_f1 = umbral, f1
+
+print("Mejor umbral:", mejor_umbral)
+```
+
+Resultado del modelo final: **0,15**.
+
+## Umbral de similitud coseno (el que usa la aplicación)
+
+```python
+def similitud_coseno(a, b):
+    num = np.sum(a * b, axis=1)
+    den = np.linalg.norm(a, axis=1) * np.linalg.norm(b, axis=1)
+    return num / np.maximum(den, 1e-9)
+
+sim_val = similitud_coseno(
+    extractor.predict(X1_val, verbose=0),
+    extractor.predict(X2_val, verbose=0),
+)
+
+mejor_umbral, mejor_f1 = 0.5, 0
+for umbral in np.arange(0.30, 1.00, 0.01):
+    f1 = f1_score(y_val, (sim_val >= umbral).astype(int))
+    if f1 > mejor_f1:
+        mejor_umbral, mejor_f1 = umbral, f1
+
+print("Mejor umbral de similitud:", mejor_umbral)
+```
+
+Resultado del modelo final: **0,90**. Ese valor se configura en `src/app.py`:
+
+```python
+UMBRAL_COINCIDENCIA = 0.90
+```
+
+**Si se entrena un modelo nuevo, hay que volver a calcular este umbral.**
+
+---
+
+# 🔍 Prueba como Buscador
+
+Mide qué tan seguido queda el perro correcto en los primeros lugares, registrando una foto de cada perro y buscando con otra foto distinta.
+
+```python
+galeria = extractor.predict(np.array(galeria_imgs), verbose=0)
+consultas = extractor.predict(np.array(consultas_imgs), verbose=0)
+
+def normalizar(m):
+    return m / np.maximum(np.linalg.norm(m, axis=1, keepdims=True), 1e-9)
+
+similitudes = normalizar(consultas) @ normalizar(galeria).T
+```
+
+Resultado del modelo final con 100 perros del conjunto de prueba:
+
+```text
+Primer lugar:          54 de 100
+Entre los 3 primeros:  77 de 100
+Entre los 5 primeros:  78 de 100
 ```
 
 ---
@@ -267,7 +436,7 @@ predicciones_clase = (
 
 ```python
 modelo.save(
-    "modelo_perros_bolivar_final.keras"
+    "modelo_perros_bolivar_scratch.keras"
 )
 ```
 
@@ -276,7 +445,7 @@ modelo.save(
 ```python
 import os
 
-ruta = "modelo_perros_bolivar_final.keras"
+ruta = "modelo_perros_bolivar_scratch.keras"
 
 print(os.path.exists(ruta))
 ```
@@ -287,7 +456,7 @@ print(os.path.exists(ruta))
 import os
 
 tamaño = os.path.getsize(
-    "modelo_perros_bolivar_final.keras"
+    "modelo_perros_bolivar_scratch.keras"
 )
 
 print(
@@ -295,6 +464,8 @@ print(
     "MB"
 )
 ```
+
+El modelo final pesa aproximadamente 5 MB.
 
 ---
 
@@ -304,10 +475,42 @@ print(
 from google.colab import files
 
 files.download(
-    "modelo_perros_bolivar_final.keras"
+    "modelo_perros_bolivar_scratch.keras"
 )
 ```
+
+Después, copiar el archivo a la carpeta `model/` del proyecto.
+
 ---
+
+# 📤 Subir el Modelo a Google Colab
+
+Cuando Colab se reinicia hay que volver a cargar el modelo guardado:
+
+```python
+import tensorflow as tf
+from tensorflow.keras import layers
+from google.colab import files
+
+@tf.keras.utils.register_keras_serializable(package="Perros")
+class AbsDifference(layers.Layer):
+    def call(self, inputs):
+        return tf.abs(inputs[0] - inputs[1])
+
+subido = files.upload()
+nombre_modelo = list(subido.keys())[0]
+
+modelo = tf.keras.models.load_model(
+    nombre_modelo,
+    custom_objects={"AbsDifference": AbsDifference},
+    safe_mode=False,
+    compile=False,
+)
+extractor = modelo.get_layer("extractor_128")
+```
+
+---
+
 # 🚀 Ejecución de la Aplicación
 
 ## Ejecutar la aplicación
@@ -328,6 +531,20 @@ Para detener la aplicación:
 
 ```text
 Ctrl + C
+```
+
+## Modelo que usa la aplicación
+
+En `src/app.py`, la ruta del modelo y el umbral son:
+
+```python
+RUTA_MODELO = (
+    BASE_DIR
+    / "model"
+    / "modelo_perros_bolivar_scratch.keras"
+)
+
+UMBRAL_COINCIDENCIA = 0.90
 ```
 
 ## Ejecutar las pruebas
@@ -371,7 +588,7 @@ git add .
 ## Crear un commit
 
 ```bash
-git commit -m "agregar modelo y documentacion inicial"
+git commit -m "agregar red neuronal propia desde cero y actualizar documentacion"
 ```
 
 ## Subir cambios a GitHub
@@ -400,6 +617,7 @@ git log --oneline
 red-neuronal-identificacion-perros-bolivar/
 │
 ├── model/
+│   ├── modelo_perros_bolivar_scratch.keras
 │   ├── modelo_perros_bolivar_12000_app.keras
 │   └── modelo_perros_bolivar_final.keras
 │
@@ -426,33 +644,29 @@ red-neuronal-identificacion-perros-bolivar/
 # 🔄 Flujo General del Proyecto
 
 ```text
-1. Descargar dataset
+1. Activar GPU en Colab
         ↓
-2. Validar dataset
+2. Descargar y extraer dataset
         ↓
-3. Extraer imágenes
+3. Verificar dataset
         ↓
-4. Preparar imágenes
+4. Crear pares
         ↓
-5. Crear pares
+5. Preparar imágenes
         ↓
-6. Construir modelo
+6. Construir la CNN propia
         ↓
 7. Entrenar
         ↓
-8. Evaluar
+8. Evaluar con perros nuevos
         ↓
-9. Analizar resultados
+9. Ajustar umbrales con validación
         ↓
-10. Mejorar modelo
+10. Probar como buscador
         ↓
-11. Fine-tuning
+11. Guardar y descargar el modelo
         ↓
-12. Evaluar nuevamente
-        ↓
-13. Guardar modelo
-        ↓
-14. Integrar en la aplicación
+12. Integrar en la aplicación
 ```
 
 ---
@@ -460,9 +674,12 @@ red-neuronal-identificacion-perros-bolivar/
 # ⚠️ Reglas Importantes
 
 - No utilizar datos de prueba durante el entrenamiento.
+- No utilizar datos de prueba para elegir umbrales.
+- No utilizar redes ni pesos preentrenados en el modelo entregado.
 - Verificar el dataset antes de comenzar un entrenamiento.
 - Registrar los resultados de cada experimento.
 - No sobrescribir un modelo funcional sin comprobar la nueva versión.
+- Recalcular el umbral de similitud cuando se entrene un modelo nuevo.
 - Mantener actualizada la documentación.
 - Utilizar Git para versionar cambios importantes.
 
@@ -476,7 +693,7 @@ El agente puede utilizar este archivo como referencia para ejecutar tareas relac
 - Preparación de datos.
 - Entrenamiento.
 - Evaluación.
-- Fine-tuning.
+- Ajuste de umbrales.
 - Gestión del modelo.
 - Git y GitHub.
 

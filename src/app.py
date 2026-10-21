@@ -29,7 +29,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 RUTA_MODELO = (
     BASE_DIR
     / "model"
-    / "modelo_perros_bolivar_12000_app.keras"
+    / "modelo_perros_bolivar_scratch.keras"
 )
 
 RUTA_CANDIDATOS = (
@@ -51,7 +51,7 @@ RUTA_DATOS_ENCONTRADOS = (
     / "datos.json"
 )
 
-UMBRAL_COINCIDENCIA = 0.76
+UMBRAL_COINCIDENCIA = 0.90
 
 # --------------------------------------------------
 # Cargar modelo
@@ -473,10 +473,10 @@ def generar_tarjetas(resultados):
             ruta
         )
 
-        if probabilidad >= 80:
+        if probabilidad >= 95:
             nivel_clase = "high"
             nivel_texto = "Alta coincidencia"
-        elif probabilidad >= 60:
+        elif probabilidad >= 90:
             nivel_clase = "medium"
             nivel_texto = "Posible coincidencia"
         else:

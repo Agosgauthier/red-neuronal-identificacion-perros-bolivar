@@ -12,6 +12,10 @@ Este archivo contiene las instrucciones y el contexto que debe conocer el agente
 
 Desarrollar y mejorar un sistema de visión por computadora capaz de comparar dos fotografías de perros y determinar si corresponden al mismo individuo o a perros diferentes.
 
+### Consigna del trabajo
+
+La red neuronal debe construirse y entrenarse **desde cero, sin utilizar redes preentrenadas** (como MobileNetV2).
+
 ---
 
 # 🎯 Objetivo del Agente
@@ -38,9 +42,32 @@ Debe ser capaz de:
 
 El proyecto utiliza una **Siamese Network** para comparar dos imágenes.
 
-La red utiliza **MobileNetV2** como extractor de características, con pesos preentrenados sobre ImageNet.
+La red utiliza una **CNN propia, creada y entrenada desde cero**, como extractor de características (`extractor_128`). Todos sus pesos parten de valores aleatorios. **No se utilizan pesos preentrenados.**
 
-Posteriormente se realizó **fine-tuning** para adaptar parte de la red al problema específico.
+Estructura del modelo:
+
+```text
+Imagen 128 × 128 × 3
+   ↓
+RandomFlip · RandomRotation · RandomZoom   (solo al entrenar)
+   ↓
+4 bloques: Conv2D → BatchNormalization → ReLU → MaxPooling
+           (32, 64, 128 y 256 filtros)
+   ↓
+GlobalAveragePooling2D → Dropout(0.3) → Dense(128, ReLU)
+   ↓
+Vector de características (huella del perro)
+```
+
+Las dos imágenes pasan por la misma red. Luego se comparan:
+
+```text
+|Vector 1 - Vector 2| → Dense(64, ReLU) → Dense(1, Sigmoid)
+```
+
+Parámetros totales: 431.073.
+
+MobileNetV2 se probó únicamente como experimento de comparación en una etapa anterior del proyecto. No forma parte del modelo entregado.
 
 ### Entrada
 
@@ -56,6 +83,8 @@ Las imágenes se redimensionan a:
 ```text
 128 × 128 píxeles
 ```
+
+y sus valores se dividen por 255.
 
 ### Salida
 
@@ -96,29 +125,47 @@ Los pares están balanceados:
 50 % → perros diferentes
 ```
 
+Los perros de prueba no se usan durante el entrenamiento. El 20 % de los pares de entrenamiento se reserva como validación.
+
 ---
 
 # 📈 Modelo Actual
 
-Hay dos modelos en el proyecto:
+El modelo final del proyecto, usado por la aplicación, es:
 
-- `model/modelo_perros_bolivar_final.keras`: clasificador binario de dos fotografías.
+- `model/modelo_perros_bolivar_scratch.keras`: red siamesa con CNN propia, 431.073 parámetros.
 
-```text
-Accuracy: 82,15 %
-Precision: 79,80 %
-Recall: 86,10 %
-F1-score: 82,83 %
-```
-
-- `model/modelo_perros_bolivar_12000_app.keras`: modelo usado por la aplicación (búsqueda por similitud, evaluado con 1.600 pares).
+Resultados sobre 2.000 pares de prueba (perros no vistos):
 
 ```text
-Accuracy: 87,81 %
-Precision: 84,89 %
-Recall: 92,00 %
-F1-score: 88,30 %
+Con similitud coseno (umbral 0,90, el que usa la aplicación):
+Accuracy:  87,55 %
+Precision: 89,24 %
+Recall:    85,40 %
+F1-score:  87,28 %
+
+Con la salida de la red (umbral 0,15):
+Accuracy:  87,55 %
+Precision: 88,20 %
+Recall:    86,70 %
+F1-score:  87,44 %
 ```
+
+Como buscador (100 perros del test, una foto registrada y otra distinta para buscar):
+
+```text
+Perro correcto en primer lugar:      54 de 100
+Perro correcto entre los 3 primeros: 77 de 100
+Perro correcto entre los 5 primeros: 78 de 100
+```
+
+Los umbrales (0,15 y 0,90) se eligieron con datos de validación, no con los de prueba.
+
+Modelos del experimento de comparación (MobileNetV2), que la aplicación ya no usa:
+
+- `model/modelo_perros_bolivar_final.keras`: Accuracy 82,15 % | F1-score 82,83 %.
+- `model/modelo_perros_bolivar_12000_app.keras`: Accuracy 87,81 % | F1-score 88,30 % (1.600 pares, umbral 0,76).
+
 ---
 
 # 🔄 Metodología de Trabajo
@@ -151,7 +198,7 @@ Las modificaciones realizadas sobre el modelo deben ser evaluadas antes de consi
 
 ## Google Colab
 
-El entrenamiento y la evaluación de la red neuronal se realizan en **Google Colab**.
+El entrenamiento y la evaluación de la red neuronal se realizan en **Google Colab**, con GPU (T4).
 
 El agente debe considerar Colab como el entorno principal para ejecutar:
 
@@ -159,7 +206,7 @@ El agente debe considerar Colab como el entorno principal para ejecutar:
 - Procesamiento de imágenes.
 - Creación de pares.
 - Entrenamiento.
-- Fine-tuning.
+- Ajuste de umbrales.
 - Evaluación.
 - Experimentación.
 
@@ -182,6 +229,7 @@ Visual Studio Code se utiliza para:
 red-neuronal-identificacion-perros-bolivar/
 │
 ├── model/
+│   ├── modelo_perros_bolivar_scratch.keras
 │   ├── modelo_perros_bolivar_12000_app.keras
 │   └── modelo_perros_bolivar_final.keras
 │
@@ -225,12 +273,13 @@ Cuando se modifique la arquitectura o el proceso de entrenamiento, el agente deb
 
 - Dataset utilizado.
 - Cantidad de datos.
-- División entre entrenamiento y prueba.
+- División entre entrenamiento, validación y prueba.
 - Arquitectura utilizada.
 - Batch size.
 - Learning rate.
 - Número de épocas.
 - Técnica de entrenamiento utilizada.
+- Umbrales de decisión y con qué datos se eligieron.
 - Accuracy.
 - Precision.
 - Recall.
@@ -267,19 +316,22 @@ No se debe asumir que una modificación mejora el modelo sin comprobarlo mediant
 
 # 💾 Gestión del Modelo
 
-El modelo entrenado debe mantenerse en:
+El modelo entrenado que usa la aplicación debe mantenerse en:
 
 ```text
-model/modelo_perros_bolivar_final.keras
+model/modelo_perros_bolivar_scratch.keras
 ```
+
+La aplicación (`src/app.py`) apunta a ese archivo mediante `RUTA_MODELO`, y usa el umbral `UMBRAL_COINCIDENCIA = 0.90`.
 
 Cuando se genere una nueva versión del modelo, se debe:
 
 1. Comprobar que pueda guardarse correctamente.
 2. Comprobar que pueda volver a cargarse.
 3. Evaluar su rendimiento.
-4. Registrar los resultados.
-5. Identificar claramente la nueva versión.
+4. **Recalcular el umbral de similitud** con datos de validación y actualizarlo en `src/app.py`.
+5. Registrar los resultados.
+6. Identificar claramente la nueva versión.
 
 ---
 
@@ -319,6 +371,8 @@ El agente no debe:
 
 - Modificar el dataset original sin necesidad.
 - Utilizar los datos de prueba para entrenar el modelo.
+- Utilizar los datos de prueba para elegir umbrales.
+- Incorporar redes o pesos preentrenados (como MobileNetV2) al modelo entregado.
 - Sobrescribir un modelo funcional sin realizar una copia o comprobar la nueva versión.
 - Eliminar documentación existente sin una razón justificada.
 - Inventar resultados de entrenamiento o evaluación.
