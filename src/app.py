@@ -49,7 +49,7 @@ RUTA_ENCONTRADOS = (
     / "found"
 )
 
-UMBRAL_COINCIDENCIA = 0.90
+UMBRAL_COINCIDENCIA = 0.40
 
 # --------------------------------------------------
 # Cargar modelo
@@ -262,45 +262,20 @@ def cargar_candidato(ruta):
 # Obtener similitud
 # --------------------------------------------------
 
+
 def obtener_probabilidad_mismo(imagen1, imagen2):
 
     imagen1 = preparar_imagen(imagen1)
     imagen2 = preparar_imagen(imagen2)
 
-    extractor = modelo_final.get_layer(
-        "extractor_128"
-    )
-
-    vector1 = extractor(
-        imagen1,
+    resultado = modelo_final(
+        [imagen1, imagen2],
         training=False
-    ).numpy()[0]
+    ).numpy()
 
-    vector2 = extractor(
-        imagen2,
-        training=False
-    ).numpy()[0]
-
-    norma1 = np.linalg.norm(vector1)
-    norma2 = np.linalg.norm(vector2)
-
-    if norma1 == 0 or norma2 == 0:
-        return 0.0
-
-    similitud = np.dot(
-        vector1,
-        vector2
-    ) / (
-        norma1 * norma2
+    return float(
+        np.clip(resultado.reshape(-1)[0], 0.0, 1.0)
     )
-
-    similitud = np.clip(
-        similitud,
-        0.0,
-        1.0
-    )
-
-    return float(similitud)
 
 # --------------------------------------------------
 # Vectores con caché
@@ -460,11 +435,8 @@ def generar_tarjetas(resultados):
         datos_encontrado = obtener_datos_encontrado(
             ruta
         )
-
-        if probabilidad >= 95:
-            nivel_clase = "high"
-            nivel_texto = "Alta coincidencia"
-        elif probabilidad >= 90:
+        
+        if resultado["probabilidad"] >= UMBRAL_COINCIDENCIA:
             nivel_clase = "medium"
             nivel_texto = "Posible coincidencia"
         else:
@@ -595,17 +567,15 @@ def buscar_coincidencias(imagen_perdido):
             generar_tarjetas([])
         )
 
-    vector_perdido = calcular_vector(imagen_perdido)
-
     resultados = []
 
     for ruta in candidatos:
 
         try:
 
-            probabilidad = similitud_coseno(
-                vector_perdido,
-                obtener_vector_candidato(ruta)
+            probabilidad = obtener_probabilidad_mismo(
+                imagen_perdido,
+                cargar_candidato(ruta)
             )
 
             resultados.append(
