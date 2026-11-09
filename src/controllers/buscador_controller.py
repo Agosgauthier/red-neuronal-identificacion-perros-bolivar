@@ -12,7 +12,7 @@ class BuscadorController:
         if imagen_perdido is None:
             return renderizado.aviso("Primero cargá una fotografía del perro perdido."), renderizado.estado_vacio()
         resultado = self.servicio.buscar(imagen_perdido)
-        return renderizado.resumen(resultado), renderizado.tarjetas(resultado.coincidencias)
+        return renderizado.resumen(resultado), renderizado.tarjetas(resultado.coincidencias, self.servicio.umbral)
 
     def comparar(self, imagen1, imagen2) -> str:
         if imagen1 is None or imagen2 is None:

@@ -45,18 +45,22 @@ def _datos_encontrado(c: Coincidencia) -> str:
     )
 
 
-def tarjetas(coincidencias: list) -> str:
+def tarjetas(coincidencias: list, umbral: float) -> str:
     if not coincidencias:
         return estado_vacio()
     items = []
     for pos, c in enumerate(coincidencias, start=1):
         nombre = html.escape(c.ruta.stem.replace("_", " ").title())
+        if c.similitud >= umbral:
+            nivel_clase, nivel_texto = "medium", "Posible coincidencia"
+        else:
+            nivel_clase, nivel_texto = "low", "Coincidencia baja"
         items.append(
             '<div class="candidate-card"><div class="candidate-photo">'
             f'<img src="{imagen_a_data_uri(c.ruta)}" alt="{nombre}"/>'
             f'<div class="rank">#{pos}</div></div>'
             '<div class="candidate-content">'
-            '<div class="candidate-status medium">🐾 Posible coincidencia</div>'
+            f'<div class="candidate-status {nivel_clase}">🐾 {nivel_texto}</div>'
             f'<div class="candidate-name">{nombre}</div>'
             f'<div class="candidate-score">{c.porcentaje:.2f}%</div>'
             '<div class="candidate-description">estimación de similitud</div>'
