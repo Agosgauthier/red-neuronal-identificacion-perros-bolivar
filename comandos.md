@@ -445,13 +445,15 @@ def normalizar(m):
 similitudes = normalizar(consultas) @ normalizar(galeria).T
 ```
 
-Resultado del modelo final con 100 perros del conjunto de prueba:
+Resultado del modelo final (D) con 100 perros del conjunto de prueba:
 
 ```text
-Primer lugar:          54 de 100
-Entre los 3 primeros:  77 de 100
-Entre los 5 primeros:  78 de 100
+Primer lugar:          70 de 100
+Entre los 3 primeros:  81 de 100
+Entre los 5 primeros:  85 de 100
 ```
+
+(Red siamesa anterior: 54, 77 y 78 de 100.)
 
 ---
 
