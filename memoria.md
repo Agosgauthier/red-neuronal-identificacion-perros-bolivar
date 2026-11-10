@@ -269,7 +269,7 @@ Búsqueda por similitud:   Accuracy 87,81 %   F1-score 88,30 %  (1.600 pares)
 
 Este experimento se conserva **solo como comparación**. No es la entrega, porque la consigna prohíbe redes preentrenadas. Las pruebas usaron conjuntos de perros y pares distintos, por lo que los números no son estrictamente comparables con los del modelo final.
 
-## Versión final — CNN propia mejorada
+## Versión intermedia — CNN propia siamesa mejorada (scratch)
 
 Se construyó nuevamente una red desde cero, con 4 bloques de convolución, BatchNormalization, Dropout, aumento de datos, 8.000 pares de entrenamiento y EarlyStopping.
 
@@ -290,7 +290,7 @@ Matriz de confusión con umbral 0,15:
  [133 867]]
 ```
 
-Resultados con similitud coseno (la que usa la aplicación), umbral 0,90:
+Resultados con similitud coseno (la que usaba la aplicación antes del modelo D), umbral 0,90:
 
 ```text
 Accuracy 87,55 % | Precision 89,24 % | Recall 85,40 % | F1-score 87,28 %
@@ -316,6 +316,37 @@ Resumen de la evolución de la red desde cero:
    ↓
 87,55 %  (CNN mejorada, umbral ajustado)
 ```
+
+## Versión final — Modelo D (extractor con pérdida de trillizos)
+
+Archivo: `model/extractor_D_trillizos.keras`. CNN propia, creada y entrenada desde cero (sin redes preentrenadas). Es solo el extractor: convierte cada foto en un vector de 128 números y dos fotos se comparan con la similitud coseno. No tiene cabeza de comparación ni sigmoide.
+
+```text
+Entrenamiento:       pérdida de trillizos (triplet loss), margen 0,3
+Tanda:               16 perros x 4 fotos = 64 imágenes
+Optimizador:         Adam, learning rate 0,001
+Épocas:              30 (100 pasos por época)
+Aumento de datos:    RandomFlip, RandomRotation, RandomZoom, RandomBrightness
+Umbral de coseno:    0,999876 (elegido en validación, F1 de validación 0,9064)
+```
+
+En la app, el coseno se reescala con una sigmoide centrada en 0,999876 (`CENTRO_COSENO` y `ESCALA_COSENO` en `src/config.py`). Por eso `UMBRAL_COINCIDENCIA = 0.5` equivale a ese coseno. El reescalado no cambia el orden de los resultados.
+
+Resultados con perros que el modelo nunca vio:
+
+```text
+Pares de prueba:       Accuracy 87,85 % | F1-score 87,78 %
+Buscador (100 perros): primero 70 de 100 | entre los 3 primeros 81 de 100 | entre los 5 primeros 85 de 100
+```
+
+Comparado con el modelo anterior, la accuracy es parecida, pero como buscador mejora de 54 a 70 de 100 en primer lugar.
+
+Otros intentos:
+
+- Las configuraciones A, B y C (más perros y distinto learning rate) dieron entre 78,6 % y 82,1 % en prueba y entre 32 y 37 de 100 en primer lugar, peor que el modelo anterior.
+- Centrar los vectores (restarles la media) empeoró el resultado (F1 de validación 0,73; 48 de 100 en primer lugar) y se descartó.
+
+Límite conocido: durante el entrenamiento, la pérdida de trillizos se estabilizó cerca de 0,30, que es el valor del margen, y las similitudes quedan entre 0,9988 y 0,99999.
 
 ---
 
