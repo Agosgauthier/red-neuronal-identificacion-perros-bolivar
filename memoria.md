@@ -469,12 +469,12 @@ red-neuronal-identificacion-perros-bolivar/
 El agente debe recordar que:
 
 - El objetivo principal es comparar dos imágenes de perros.
-- El modelo actual utiliza una arquitectura Siamese con una CNN propia creada desde cero.
 - **No se deben utilizar redes preentrenadas** (como MobileNetV2) en el modelo entregado.
-- El modelo final es `modelo_perros_bolivar_scratch.keras`, con 431.073 parámetros.
-- La aplicación busca coincidencias con similitud coseno sobre la capa `extractor_128`, con umbral de 0,90.
-- Resultado del modelo final: 87,55 % de accuracy sobre 2.000 pares de prueba; como buscador, el perro correcto queda primero en 54 de 100 y entre los 5 primeros en 78 de 100.
-- Los umbrales (0,15 para la salida de la red y 0,90 para la similitud coseno) se eligieron con datos de validación, no con los de prueba.
+- El modelo actual es una CNN propia creada desde cero, entrenada con pérdida de trillizos. La versión anterior era una red Siamese.
+- El modelo final es `extractor_D_trillizos.keras` (solo extractor, entrenado con pérdida de trillizos). `modelo_perros_bolivar_scratch.keras` es la versión anterior, conservada como comparación.
+- La aplicación busca coincidencias con similitud coseno entre los vectores del extractor. El coseno se reescala con una sigmoide (`CENTRO_COSENO = 0.999876`, `ESCALA_COSENO = 0.0001`) y el umbral de la app es `UMBRAL_COINCIDENCIA = 0.5`, que equivale a un coseno de 0,999876.
+- Resultado del modelo final: 87,85 % de accuracy y 87,78 % de F1 sobre los pares de prueba; como buscador, el perro correcto queda primero en 70 de 100 y entre los 5 primeros en 85 de 100.
+- Los umbrales se eligieron con datos de validación, no con los de prueba (versión anterior: 0,15 y 0,90; modelo D: 0,999876).
 - Los datos de prueba deben mantenerse separados de los datos de entrenamiento.
 - No se deben inventar resultados experimentales.
 - Cada nueva mejora debe ser evaluada antes de considerarse definitiva.
@@ -583,7 +583,13 @@ El proyecto se encuentra en una etapa funcional de desarrollo, con el modelo int
 
 Modelo final (entregado):
 
-- `modelo_perros_bolivar_scratch.keras`: red siamesa con CNN propia, usada por la aplicación.
+- `extractor_D_trillizos.keras`: CNN propia con pérdida de trillizos, usada por la aplicación.
+  Umbral de coseno 0,999876 (F1 de validación 0,9064). Pares de prueba: Accuracy 87,85 % | F1-score 87,78 %.
+  Como buscador con 100 perros: primero 70/100 | entre los 3 primeros 81/100 | entre los 5 primeros 85/100.
+
+Versión anterior (comparación):
+
+- `modelo_perros_bolivar_scratch.keras`: red siamesa con CNN propia.
   Sobre 2.000 pares de prueba con similitud coseno y umbral 0,90:
   Accuracy 87,55 % | Precision 89,24 % | Recall 85,40 % | F1-score 87,28 %
   Como buscador con 100 perros: primero 54/100 | entre los 3 primeros 77/100 | entre los 5 primeros 78/100.
@@ -593,7 +599,7 @@ Modelos de comparación (MobileNetV2, no usados por la aplicación):
 - `modelo_perros_bolivar_final.keras`: Accuracy 82,15 % | F1-score 82,83 %
 - `modelo_perros_bolivar_12000_app.keras`: Accuracy 87,81 % | F1-score 88,30 % (1.600 pares, umbral 0,76)
 
-Umbral de coincidencia en la aplicación: 0,90.
+Umbral de coincidencia en la aplicación: 0.5 sobre el coseno reescalado (equivale a un coseno de 0,999876).
 
 Limitaciones conocidas:
 
@@ -602,4 +608,4 @@ Limitaciones conocidas:
 - Los vectores de las fotos candidatas se guardan en caché mientras la aplicación está abierta, pero no hay un índice persistente: con miles de fotos la primera búsqueda tardaría mucho.
 - Con pocas fotos en la galería, los puntajes de perros distintos quedan muy juntos (en pruebas manuales, entre 92 % y 99 %) y el perro correcto no siempre queda primero.
 
-La línea base actual para próximas mejoras es el modelo final desde cero (87,55 % en pares y 54 % de acierto en primer lugar).
+La línea base actual para próximas mejoras es el modelo D (87,85 % en pares y 70 % de acierto en primer lugar).
