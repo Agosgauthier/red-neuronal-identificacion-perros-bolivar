@@ -91,6 +91,38 @@ YT-BB-Dog/
 
 ---
 
+# 🏆 Modelo Final (D) — Extractor con pérdida de trillizos
+
+Es el modelo que usa la aplicación (`model/extractor_D_trillizos.keras`). Es una CNN propia, creada y entrenada desde cero, sin redes preentrenadas. Es solo el extractor: convierte cada foto en un vector de 128 números y dos fotos se comparan con la similitud coseno.
+
+## Entrenamiento
+
+```text
+Pérdida:            trillizos (triplet loss), margen 0,3
+Tanda:              16 perros x 4 fotos = 64 imágenes
+Optimizador:        Adam, learning rate 0,001
+Épocas:             30 (100 pasos por época)
+Aumento de datos:   RandomFlip, RandomRotation, RandomZoom, RandomBrightness
+```
+
+## Umbral
+
+```text
+Umbral de coseno:   0,999876 (elegido en validación)
+F1 en validación:   0,9064
+```
+
+La aplicación reescala el coseno con una sigmoide (`CENTRO_COSENO` y `ESCALA_COSENO` en `src/config.py`). Por eso `UMBRAL_COINCIDENCIA = 0.5` equivale a un coseno de 0,999876.
+
+## Resultados con perros que el modelo nunca vio
+
+```text
+Pares de prueba:       Accuracy 87,85 % | F1-score 87,78 %
+Buscador (100 perros): primero 70 | entre los 3 primeros 81 | entre los 5 primeros 85
+```
+
+---
+
 # 🧠 Modelo de Predicción
 
 Se implementó una **Siamese Network** para comparar dos fotografías.
