@@ -13,7 +13,9 @@ EXTENSIONES_VALIDAS = {".jpg", ".jpeg", ".png", ".webp"}
 TAMANO_IMAGEN = 128
 CAPA_EXTRACTOR = "extractor_128"
 
-# Probabilidad mínima (salida de la red) para considerar una coincidencia.
+# Modelo D (extractor + similitud coseno): el coseno se reescala con una sigmoide
+# centrada en CENTRO_COSENO (el umbral elegido en validación). Por eso 0.5 equivale
+# a un coseno de 0,999876.
 UMBRAL_COINCIDENCIA = 0.5
 CENTRO_COSENO = 0.999876
 ESCALA_COSENO = 0.0001
