@@ -108,7 +108,7 @@ El dataset contiene:
 - **2.723 perros**
 - **27.036 imágenes**
 
-Para el experimento final se trabajó con:
+Para la versión anterior (red siamesa) se trabajó con:
 
 ```text
 400 perros → entrenamiento
@@ -244,7 +244,8 @@ red-neuronal-identificacion-perros-bolivar/
 │   └── ci.yml
 │
 ├── model/
-│   └── modelo_perros_bolivar_scratch.keras
+│   ├── extractor_D_trillizos.keras   (modelo final, el que usa la app)
+│   └── modelo_perros_bolivar_scratch.keras   (versión anterior, comparación) 
 │
 ├── experimentos/
 │   └── mobilenet_preentrenado/    (versión anterior con MobileNetV2, NO es la entrega)
@@ -360,10 +361,10 @@ No se debe asumir que una modificación mejora el modelo sin comprobarlo mediant
 El modelo entrenado que usa la aplicación debe mantenerse en:
 
 ```text
-model/modelo_perros_bolivar_scratch.keras
+model/extractor_D_trillizos.keras
 ```
 
-La aplicación (`src/config.py`) apunta a ese archivo mediante `RUTA_MODELO`, y usa el umbral `UMBRAL_COINCIDENCIA = 0.90`.
+La aplicación (`src/config.py`) apunta a ese archivo mediante `RUTA_MODELO`. Compara por similitud coseno reescalada (`CENTRO_COSENO = 0.999876`, `ESCALA_COSENO = 0.0001`) y usa `UMBRAL_COINCIDENCIA = 0.5`, que equivale a un coseno de 0,999876.
 
 Cuando se genere una nueva versión del modelo, se debe:
 
