@@ -487,12 +487,12 @@ Los perros encontrados se registran en una base de datos **SQLite** local (`data
 | `contacto` | Medio de contacto de quien lo encontró |
 | `fecha_registro` | Fecha y hora del registro en la aplicación |
 
-El módulo `src/db.py` ofrece las funciones `inicializar_base_datos()`, `registrar_perro()`, `obtener_perro_por_imagen()` y `obtener_perros()`. La aplicación crea la base automáticamente la primera vez que se registra un perro.
+La clase `PerrosRepository` (`src/services/perros_repository.py`) ofrece `registrar()`, `obtener_por_imagen()` y `listar()`. La aplicación crea la base automáticamente la primera vez que se registra un perro.
 
 La base de datos y las fotografías de `data/found/` **no se suben a GitHub** (están en el `.gitignore`), porque contienen datos de contacto de personas. Si existiera un archivo `data/found/datos.json` de una versión anterior, sus registros se pasan a SQLite con:
 
 ```bash
-python -m src.migrar_json_a_sqlite
+python -m scripts.migrar_json_a_sqlite
 ```
 
 ---
@@ -511,7 +511,7 @@ Desde la raíz del proyecto, con el entorno virtual activado:
 
 ```bash
 pip install -r requirements.txt
-python -m src.app
+python main.py
 ```
 
 La aplicación se abre en `http://127.0.0.1:7860`. Se ejecuta como módulo (`-m`) para que funcionen los imports internos del proyecto.
@@ -547,15 +547,29 @@ red-neuronal-identificacion-perros-bolivar/
 ├── 📂 notebooks/
 │   └── 📄 red_desde_cero_perros.ipynb
 │
+├── 📄 main.py                    (solo arranca la app)
+│
 ├── 📂 src/
-│   ├── 📄 app.py
-│   ├── 📄 db.py
-│   ├── 📄 generar_pares.py
+│   ├── 📄 config.py              (rutas y umbral)
+│   ├── 📂 models/                (clases de datos)
+│   ├── 📂 services/              (toda la lógica, en clases)
+│   │   ├── 📄 modelo_service.py
+│   │   ├── 📄 buscador_service.py
+│   │   ├── 📄 perros_repository.py
+│   │   ├── 📄 dataset_service.py
+│   │   └── 📄 evaluacion_service.py
+│   ├── 📂 controllers/           (conecta la vista con los services)
+│   └── 📂 views/                 (interfaz Gradio, HTML y CSS)
+│
+├── 📂 scripts/
 │   └── 📄 migrar_json_a_sqlite.py
 │
 ├── 📂 tests/
-│   ├── 📄 test_app.py
-│   └── 📄 test_db.py
+│   ├── 📄 test_modelo_service.py
+│   ├── 📄 test_buscador_service.py
+│   ├── 📄 test_repository.py
+│   ├── 📄 test_controller.py
+│   └── 📄 test_dataset_y_evaluacion.py
 │
 ├── 📄 README.md
 ├── 📄 AGENT.md

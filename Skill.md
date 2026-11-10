@@ -245,7 +245,7 @@ Aplicarlo sobre los datos de prueba
 Registrar los resultados
 ```
 
-Cuando se entrene un modelo nuevo, el umbral debe recalcularse y actualizarse en `src/app.py` (`UMBRAL_COINCIDENCIA`).
+Cuando se entrene un modelo nuevo, el umbral debe recalcularse y actualizarse en `src/config.py` (`UMBRAL_COINCIDENCIA`).
 
 ---
 
@@ -500,7 +500,7 @@ El agente puede trabajar con la aplicación de comparación de perros y ejecutar
 Archivo principal:
 
 ```text
-src/app.py
+main.py
 ```
 
 La aplicación carga `modelo_perros_bolivar_scratch.keras`, calcula la similitud coseno sobre la capa `extractor_128` y usa el umbral 0,90.
@@ -508,7 +508,7 @@ La aplicación carga `modelo_perros_bolivar_scratch.keras`, calcula la similitud
 Para ejecutarla:
 
 ```bash
-python -m src.app
+python main.py
 ```
 
 ## Pruebas
@@ -516,8 +516,11 @@ python -m src.app
 Las pruebas se encuentran en:
 
 ```text
-tests/test_app.py
-tests/test_db.py
+tests/test_modelo_service.py
+tests/test_buscador_service.py
+tests/test_repository.py
+tests/test_controller.py
+tests/test_dataset_y_evaluacion.py
 ```
 
 Para ejecutarlas:

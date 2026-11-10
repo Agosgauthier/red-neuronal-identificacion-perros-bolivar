@@ -398,16 +398,29 @@ red-neuronal-identificacion-perros-bolivar/
 ├── notebooks/
 │   └── red_desde_cero_perros.ipynb
 │
+├── main.py                       (solo arranca la app)
+│
 ├── src/
-│   ├── __init__.py
-│   ├── app.py
-│   ├── db.py
-│   ├── generar_pares.py
+│   ├── config.py                 (rutas y umbral)
+│   ├── models/                   (clases de datos)
+│   ├── services/                 (toda la lógica, en clases)
+│   │   ├── modelo_service.py
+│   │   ├── buscador_service.py
+│   │   ├── perros_repository.py
+│   │   ├── dataset_service.py
+│   │   └── evaluacion_service.py
+│   ├── controllers/              (conecta la vista con los services)
+│   └── views/                    (interfaz Gradio, HTML y CSS)
+│
+├── scripts/
 │   └── migrar_json_a_sqlite.py
 │
 ├── tests/
-│   ├── test_app.py
-│   └── test_db.py
+│   ├── test_modelo_service.py
+│   ├── test_buscador_service.py
+│   ├── test_repository.py
+│   ├── test_controller.py
+│   └── test_dataset_y_evaluacion.py
 │
 ├── README.md
 ├── AGENT.md
@@ -522,7 +535,7 @@ El proyecto cuenta actualmente con:
 
 ✅ Experimento con MobileNetV2 archivado en experimentos/mobilenet_preentrenado/ (no es la entrega)
 
-✅ Aplicación ejecutable con python -m src.app
+✅ Aplicación ejecutable con python main.py
 
 ✅ Pruebas automatizadas implementadas
 
