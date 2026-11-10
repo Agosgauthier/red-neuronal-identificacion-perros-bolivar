@@ -404,8 +404,11 @@ F1-score:  87,28 %
 
 El proyecto contiene los siguientes modelos:
 
+- `model/extractor_D_trillizos.keras`  
+  **Modelo final del proyecto.** CNN propia, creada y entrenada desde cero, sin redes preentrenadas. Es el que utiliza la aplicación: genera un vector por foto y compara por similitud coseno.
+
 - `model/modelo_perros_bolivar_scratch.keras`  
-  **Modelo final del proyecto.** Red siamesa con CNN propia, sin redes preentrenadas. Es el que utiliza la aplicación: extrae características mediante `extractor_128` y realiza la búsqueda por similitud.
+  Versión anterior de la red siamesa con CNN propia. Se conserva como comparación.
 
 - `experimentos/mobilenet_preentrenado/modelo_perros_bolivar_12000_app.keras` y `experimentos/mobilenet_preentrenado/modelo_perros_bolivar_final.keras`  
   Modelos del experimento de comparación con MobileNetV2.
@@ -501,7 +504,7 @@ python -m scripts.migrar_json_a_sqlite
 
 La carpeta `experimentos/mobilenet_preentrenado/` guarda una versión anterior del proyecto basada en **MobileNetV2 preentrenada** (transfer learning), con sus scripts, su notebook y sus modelos.
 
-Se conserva únicamente como comparación. **No forma parte de la entrega**: el modelo entregado es una red siamesa con CNN propia, creada y entrenada desde cero, sin redes preentrenadas (`model/modelo_perros_bolivar_scratch.keras`, notebook `notebooks/red_desde_cero_perros.ipynb`).
+Se conserva únicamente como comparación. **No forma parte de la entrega**: el modelo entregado es una CNN propia, creada y entrenada desde cero, sin redes preentrenadas (`model/extractor_D_trillizos.keras`, notebook `notebooks/red_desde_cero_perros.ipynb`).
 
 ---
 
@@ -532,7 +535,8 @@ red-neuronal-identificacion-perros-bolivar/
 │   └── 📄 ci.yml
 │
 ├── 📂 model/
-│   └── 📄 modelo_perros_bolivar_scratch.keras
+|   ├── 📄 extractor_D_trillizos.keras   (modelo final, el que usa la app)
+│   └── 📄 modelo_perros_bolivar_scratch.keras  (versión anterior, comparación)
 │
 ├── 📂 experimentos/
 │   └── 📂 mobilenet_preentrenado/    (versión anterior con MobileNetV2, NO es la entrega)
@@ -675,3 +679,36 @@ La aplicación permite cargar una fotografía de un perro perdido y compararla c
 ## Proyecto de Redes Neuronales
 
 **Computer Vision · Deep Learning · TensorFlow · Keras**
+
+## Resultados del modelo
+
+El modelo final es `extractor_D_trillizos.keras`: una red convolucional creada y
+entrenada desde cero (sin redes preentrenadas) que convierte cada foto en un vector.
+Dos fotos se comparan con la similitud coseno entre sus vectores.
+
+### Métricas
+
+| Medida | Resultado |
+|---|---|
+| F1 en validación (donde se eligió el umbral) | 0,9064 |
+| Accuracy en prueba | 87,85 % |
+| F1 en prueba | 87,78 % |
+| Búsqueda: perro correcto primero (100 consultas) | 70 de 100 |
+
+El umbral se eligió en validación y recién después se midió en prueba, así que
+los números de prueba son honestos.
+
+### Comparación de configuraciones
+
+Se probaron cuatro configuraciones (A, B, C y D). Las tres primeras dieron
+resultados entre 74 % y 82 % en prueba, con diferencias que no eran confiables
+porque cada entrenamiento arranca con pesos distintos. La configuración D fue la
+mejor y la única que mejoró de forma clara tanto en validación como en prueba.
+
+### Límites conocidos
+
+- Las similitudes del modelo D caen entre 0,9988 y 0,99999, por eso la app las
+  reescala (`CENTRO_COSENO` y `ESCALA_COSENO` en `config.py`) para mostrarlas
+  como porcentajes. El reescalado no cambia el orden de los resultados.
+- Con fotos difíciles (el perro ocupa poco espacio o aparecen personas en la imagen), la búsqueda es menos precisa.
+- La similitud es una estimación y no confirma por sí sola la identidad del perro.

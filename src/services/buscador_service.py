@@ -67,7 +67,7 @@ class BuscadorService:
         if mejor < self.umbral:
             return ResultadoBusqueda([], len(resultados), False, mejor)
 
-        top = resultados[: self.cantidad]
+        top = [c for c in resultados if c.similitud >= self.umbral][: self.cantidad]    
         for c in top:
             if c.ruta.parent == self.ruta_encontrados:
                 c.datos = self.repositorio.obtener_por_imagen(c.ruta.name)
