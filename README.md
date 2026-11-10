@@ -1,8 +1,7 @@
 # 🐕 Identificación de Perros en Bolívar — Red Neuronal
 
 ## Proyecto de Redes Neuronales
-
-**Sistema de comparación de imágenes basado en una red Siamese con CNN propia (sin redes preentrenadas) para identificar posibles coincidencias de un perro perdido entre fotografías candidatas.**
+**Sistema de comparación de imágenes basado en una CNN propia (sin redes preentrenadas) que convierte cada foto en un vector y las compara por similitud coseno, para identificar posibles coincidencias de un perro perdido entre fotografías candidatas. El modelo final (D) se entrena con pérdida de trillizos; la red siamesa anterior se conserva como comparación.**
 
 ---
 
@@ -21,7 +20,9 @@
 
 # 🏗️ Arquitectura
 
-El proyecto utiliza una arquitectura de tipo **Siamese Network**, orientada a comparar dos imágenes y determinar si pertenecen al mismo individuo.
+El proyecto utiliza una **CNN propia** que convierte cada foto en un vector, y compara dos fotos con la **similitud coseno** entre sus vectores para determinar si pertenecen al mismo individuo. La versión anterior usaba una **Siamese Network** con una cabeza de comparación; ahora el extractor se entrena directamente con pérdida de trillizos.
+
+El diagrama de abajo muestra el funcionamiento general: las dos imágenes pasan por la misma red y se comparan.
 
 ## Tecnologías utilizadas
 
@@ -123,7 +124,9 @@ Buscador (100 perros): primero 70 | entre los 3 primeros 81 | entre los 5 primer
 
 ---
 
-# 🧠 Modelo de Predicción
+# 🧠 Modelo Anterior (red siamesa scratch)
+
+> Las secciones siguientes, hasta "Feedback Loop", describen la versión anterior del proyecto. Se conservan porque forman parte del ciclo de mejora. El modelo que usa la aplicación hoy es el **D**, descripto más arriba.
 
 Se implementó una **Siamese Network** para comparar dos fotografías.
 
@@ -194,7 +197,7 @@ Las imágenes fueron redimensionadas a:
 
 Los valores de los píxeles fueron normalizados dividiéndolos por 255.
 
-## Dataset experimental final
+## Dataset experimental de la versión anterior
 
 ```text
 400 perros → entrenamiento
@@ -235,7 +238,7 @@ El entrenamiento se detuvo automáticamente en la época 14 (EarlyStopping). Se 
 
 ---
 
-# 🔎 Búsqueda de Coincidencias
+# 🔎 Búsqueda de Coincidencias (versión anterior)
 
 Para la búsqueda de perros candidatos, la aplicación utiliza el vector de características generado por la capa `extractor_128`.
 
@@ -401,7 +404,7 @@ El aumento de datos permitió mejorar la capacidad de generalización del modelo
 
 ---
 
-# 4️⃣ Modelo Final — CNN propia mejorada
+# 4️⃣ Modelo intermedio — CNN propia siamesa mejorada
 
 Se construyó nuevamente una red desde cero, esta vez con:
 
@@ -422,12 +425,18 @@ F1-score:  87,28 %
 
 ## Evolución del modelo desde cero
 
+Después de este modelo se probaron las configuraciones A, B y C (más perros y distinto learning rate), que no mejoraron de forma confiable. Luego, en la configuración D, se entrenó el extractor directamente con pérdida de trillizos, para que las fotos del mismo perro queden cerca y las de perros distintos queden lejos.
+
+Un intento de centrar los vectores (restarles la media) empeoró el resultado (F1 de validación 0,73 y 48 de 100 como buscador), por lo que se descartó.
+
 ```text
 56,25 %   (CNN con 16 perros)
    ↓
 71,85 %   (CNN mejorada, umbral 0,5)
    ↓
 87,55 %   (CNN mejorada, umbral ajustado)
+   ↓
+87,85 %   (modelo D con trillizos; búsqueda: primero 54 → 70 de 100)
 ```
 
 ---
@@ -744,3 +753,4 @@ mejor y la única que mejoró de forma clara tanto en validación como en prueba
   como porcentajes. El reescalado no cambia el orden de los resultados.
 - Con fotos difíciles (el perro ocupa poco espacio o aparecen personas en la imagen), la búsqueda es menos precisa.
 - La similitud es una estimación y no confirma por sí sola la identidad del perro.
+- Durante el entrenamiento, la pérdida de trillizos se estabilizó cerca de 0,30, que es el valor del margen. Es una señal de que el extractor separa poco las fotos de perros distintos, y explica que las similitudes queden tan juntas. Mejorarlo es el próximo paso.
