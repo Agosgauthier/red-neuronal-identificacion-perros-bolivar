@@ -247,16 +247,29 @@ red-neuronal-identificacion-perros-bolivar/
 ├── notebooks/
 │   └── red_desde_cero_perros.ipynb
 │
+├── main.py                       (solo arranca la app)
+│
 ├── src/
-│   ├── __init__.py
-│   ├── app.py
-│   ├── db.py
-│   ├── generar_pares.py
+│   ├── config.py                 (rutas y umbral)
+│   ├── models/                   (clases de datos)
+│   ├── services/                 (toda la lógica, en clases)
+│   │   ├── modelo_service.py
+│   │   ├── buscador_service.py
+│   │   ├── perros_repository.py
+│   │   ├── dataset_service.py
+│   │   └── evaluacion_service.py
+│   ├── controllers/              (conecta la vista con los services)
+│   └── views/                    (interfaz Gradio, HTML y CSS)
+│
+├── scripts/
 │   └── migrar_json_a_sqlite.py
 │
 ├── tests/
-│   ├── test_app.py
-│   └── test_db.py
+│   ├── test_modelo_service.py
+│   ├── test_buscador_service.py
+│   ├── test_repository.py
+│   ├── test_controller.py
+│   └── test_dataset_y_evaluacion.py
 │
 ├── README.md
 ├── AGENT.md
@@ -338,14 +351,14 @@ El modelo entrenado que usa la aplicación debe mantenerse en:
 model/modelo_perros_bolivar_scratch.keras
 ```
 
-La aplicación (`src/app.py`) apunta a ese archivo mediante `RUTA_MODELO`, y usa el umbral `UMBRAL_COINCIDENCIA = 0.90`.
+La aplicación (`src/config.py`) apunta a ese archivo mediante `RUTA_MODELO`, y usa el umbral `UMBRAL_COINCIDENCIA = 0.90`.
 
 Cuando se genere una nueva versión del modelo, se debe:
 
 1. Comprobar que pueda guardarse correctamente.
 2. Comprobar que pueda volver a cargarse.
 3. Evaluar su rendimiento.
-4. **Recalcular el umbral de similitud** con datos de validación y actualizarlo en `src/app.py`.
+4. **Recalcular el umbral de similitud** con datos de validación y actualizarlo en `src/config.py`.
 5. Registrar los resultados.
 6. Identificar claramente la nueva versión.
 

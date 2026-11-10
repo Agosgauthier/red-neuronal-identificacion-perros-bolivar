@@ -49,6 +49,7 @@ dataset/
 
 # Modelos grandes
 *.keras
+!model/extractor_D_trillizos.keras
 
 # Modelo principal entrenado desde cero: permitirlo aunque exista *.keras
 !model/modelo_perros_bolivar_scratch.keras

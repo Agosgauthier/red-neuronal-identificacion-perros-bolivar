@@ -396,7 +396,7 @@ for umbral in np.arange(0.30, 1.00, 0.01):
 print("Mejor umbral de similitud:", mejor_umbral)
 ```
 
-Resultado del modelo final: **0,90**. Ese valor se configura en `src/app.py`:
+Resultado del modelo final: **0,90**. Ese valor se configura en `src/config.py`:
 
 ```python
 UMBRAL_COINCIDENCIA = 0.90
@@ -518,7 +518,7 @@ extractor = modelo.get_layer("extractor_128")
 Con el entorno virtual activado:
 
 ```bash
-python -m src.app
+python main.py
 ```
 
 La aplicación estará disponible en:
@@ -535,7 +535,7 @@ Ctrl + C
 
 ## Modelo que usa la aplicación
 
-En `src/app.py`, la ruta del modelo y el umbral son:
+En `src/config.py`, la ruta del modelo y el umbral son:
 
 ```python
 RUTA_MODELO = (
@@ -635,16 +635,29 @@ red-neuronal-identificacion-perros-bolivar/
 ├── notebooks/
 │   └── red_desde_cero_perros.ipynb
 │
+├── main.py                       (solo arranca la app)
+│
 ├── src/
-│   ├── __init__.py
-│   ├── app.py
-│   ├── db.py
-│   ├── generar_pares.py
+│   ├── config.py                 (rutas y umbral)
+│   ├── models/                   (clases de datos)
+│   ├── services/                 (toda la lógica, en clases)
+│   │   ├── modelo_service.py
+│   │   ├── buscador_service.py
+│   │   ├── perros_repository.py
+│   │   ├── dataset_service.py
+│   │   └── evaluacion_service.py
+│   ├── controllers/              (conecta la vista con los services)
+│   └── views/                    (interfaz Gradio, HTML y CSS)
+│
+├── scripts/
 │   └── migrar_json_a_sqlite.py
 │
 ├── tests/
-│   ├── test_app.py
-│   └── test_db.py
+│   ├── test_modelo_service.py
+│   ├── test_buscador_service.py
+│   ├── test_repository.py
+│   ├── test_controller.py
+│   └── test_dataset_y_evaluacion.py
 │
 ├── README.md
 ├── AGENT.md
