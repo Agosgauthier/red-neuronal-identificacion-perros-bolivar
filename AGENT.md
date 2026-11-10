@@ -67,6 +67,8 @@ Las dos imágenes pasan por la misma red. Luego se comparan:
 
 Parámetros totales: 431.073.
 
+**Versión actual (modelo D):** la aplicación usa `extractor_D_trillizos.keras`, que es solo el extractor (sin cabeza de comparación), entrenado con pérdida de trillizos y comparado por similitud coseno. La descripción de arriba corresponde a la red siamesa anterior.
+
 MobileNetV2 se probó únicamente como experimento de comparación en una etapa anterior del proyecto. No forma parte del modelo entregado.
 
 ### Entrada
@@ -133,12 +135,22 @@ Los perros de prueba no se usan durante el entrenamiento. El 20 % de los pares d
 
 El modelo final del proyecto, usado por la aplicación, es:
 
-- `model/modelo_perros_bolivar_scratch.keras`: red siamesa con CNN propia, 431.073 parámetros.
-
-Resultados sobre 2.000 pares de prueba (perros no vistos):
+- `model/extractor_D_trillizos.keras`: CNN propia (solo extractor), entrenada con pérdida de trillizos (margen 0,3; 16 perros x 4 fotos por tanda; Adam 0,001; 30 épocas de 100 pasos). Se compara por similitud coseno.
 
 ```text
-Con similitud coseno (umbral 0,90, el que usa la aplicación):
+Umbral de coseno: 0,999876 (elegido en validación, F1 de validación 0,9064)
+Pares de prueba:  Accuracy 87,85 % | F1-score 87,78 %
+Buscador (100 perros): primero 70 | entre los 3 primeros 81 | entre los 5 primeros 85 (de 100)
+```
+
+La aplicación reescala el coseno con una sigmoide (`CENTRO_COSENO` y `ESCALA_COSENO` en `src/config.py`), por eso `UMBRAL_COINCIDENCIA = 0.5`.
+
+Versión anterior, conservada como comparación: `model/modelo_perros_bolivar_scratch.keras`, red siamesa con CNN propia, 431.073 parámetros.
+
+Resultados de la versión anterior sobre 2.000 pares de prueba (perros no vistos):
+
+```text
+Con similitud coseno (umbral 0,90, el que usaba la aplicación antes del modelo D):
 Accuracy:  87,55 %
 Precision: 89,24 %
 Recall:    85,40 %
@@ -151,7 +163,7 @@ Recall:    86,70 %
 F1-score:  87,44 %
 ```
 
-Como buscador (100 perros del test, una foto registrada y otra distinta para buscar):
+Como buscador (versión anterior; 100 perros del test, una foto registrada y otra distinta para buscar):
 
 ```text
 Perro correcto en primer lugar:      54 de 100
