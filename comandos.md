@@ -396,13 +396,38 @@ for umbral in np.arange(0.30, 1.00, 0.01):
 print("Mejor umbral de similitud:", mejor_umbral)
 ```
 
-Resultado del modelo final: **0,90**. Ese valor se configura en `src/config.py`:
+Resultado de la red siamesa anterior: **0,90**.
+
+Para el **modelo final (D)**, el umbral de coseno elegido en validación fue **0,999876** (F1 de validación 0,9064). La app reescala el coseno con una sigmoide, así que en `src/config.py` queda:
 
 ```python
-UMBRAL_COINCIDENCIA = 0.90
+CENTRO_COSENO = 0.999876
+ESCALA_COSENO = 0.0001
+UMBRAL_COINCIDENCIA = 0.5   # equivale a un coseno de 0,999876
 ```
 
 **Si se entrena un modelo nuevo, hay que volver a calcular este umbral.**
+
+---
+
+# 🏆 Modelo Final (D): entrenar, guardar y cargar
+
+El entrenamiento se hace en Google Colab (notebook `notebooks/red_desde_cero_perros.ipynb`).
+
+```python
+# Entrenar el extractor con pérdida de trillizos (16 perros x 4 fotos por tanda)
+extractor.compile(optimizer=tf.keras.optimizers.Adam(0.001), loss=perdida_trillizos)
+extractor.fit(dataset_tf, steps_per_epoch=100, epochs=30)
+
+# Guardar
+extractor.save("extractor_D_trillizos.keras")
+```
+
+Copiar el archivo descargado a `model/extractor_D_trillizos.keras` y ejecutar la app:
+
+```bash
+python main.py
+```
 
 ---
 
@@ -538,13 +563,11 @@ Ctrl + C
 En `src/config.py`, la ruta del modelo y el umbral son:
 
 ```python
-RUTA_MODELO = (
-    BASE_DIR
-    / "model"
-    / "modelo_perros_bolivar_scratch.keras"
-)
+RUTA_MODELO = BASE_DIR / "model" / "extractor_D_trillizos.keras"
 
-UMBRAL_COINCIDENCIA = 0.90
+UMBRAL_COINCIDENCIA = 0.5      # sobre el coseno reescalado (equivale a coseno 0,999876)
+CENTRO_COSENO = 0.999876
+ESCALA_COSENO = 0.0001
 ```
 
 ## Ejecutar las pruebas
@@ -620,7 +643,8 @@ red-neuronal-identificacion-perros-bolivar/
 │   └── ci.yml
 │
 ├── model/
-│   └── modelo_perros_bolivar_scratch.keras
+│   ├── extractor_D_trillizos.keras   (modelo final, el que usa la app)
+│   └── modelo_perros_bolivar_scratch.keras   (versión anterior, comparación)
 │
 ├── experimentos/
 │   └── mobilenet_preentrenado/    (versión anterior con MobileNetV2, NO es la entrega)
