@@ -77,7 +77,7 @@ Los pares fueron balanceados para mantener una cantidad equivalente de ejemplos 
 
 ---
 
-# 📊 Experimento Final
+# 📊 Experimento de la versión anterior (red siamesa)
 
 Para el experimento final se seleccionaron:
 
@@ -137,7 +137,9 @@ Los valores de los píxeles se dividieron por 255, para que queden entre 0 y 1.
 
 ---
 
-# 🧠 Arquitectura
+# 🧠 Arquitectura de la versión anterior (red siamesa)
+
+> Esta sección y las dos siguientes (extractor y comparación) describen la red siamesa anterior. El modelo actual, el D, está descripto en "Versión final — Modelo D", dentro de "Evolución del Proyecto".
 
 La arquitectura principal utilizada es una **Siamese Network** con una **CNN propia creada desde cero**.
 
@@ -227,7 +229,7 @@ Total:           431.073
 
 # ⚙️ Entrenamiento
 
-Configuración del modelo final:
+Configuración de la versión anterior (red siamesa):
 
 ```text
 Optimizador:           Adam
@@ -355,10 +357,12 @@ Límite conocido: durante el entrenamiento, la pérdida de trillizos se estabili
 El modelo final del proyecto, utilizado por la aplicación:
 
 ```text
-model/modelo_perros_bolivar_scratch.keras
+model/extractor_D_trillizos.keras
 ```
 
 Tamaño aproximado: 5 MB.
+
+Versión anterior (red siamesa), conservada como comparación: `model/modelo_perros_bolivar_scratch.keras`.
 
 Modelos del experimento de comparación (MobileNetV2), que ya no usa la aplicación:
 
@@ -414,7 +418,8 @@ red-neuronal-identificacion-perros-bolivar/
 │   └── ci.yml
 │
 ├── model/
-│   └── modelo_perros_bolivar_scratch.keras
+│   ├── extractor_D_trillizos.keras   (modelo final, el que usa la app)
+│   └── modelo_perros_bolivar_scratch.keras   (versión anterior, comparación)
 │
 ├── experimentos/
 │   └── mobilenet_preentrenado/    (versión anterior con MobileNetV2, NO es la entrega)
@@ -552,7 +557,7 @@ El proyecto cuenta actualmente con:
 
 ✅ Modelo evaluado como clasificador y como buscador
 
-✅ Modelo final exportado (modelo_perros_bolivar_scratch.keras)
+✅ Modelo final exportado (extractor_D_trillizos.keras)
 
 ✅ Aplicación Gradio conectada al modelo final
 
