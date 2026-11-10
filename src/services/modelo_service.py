@@ -34,9 +34,25 @@ class ModeloService:
             safe_mode=False,
             compile=False,
         )
-        extractor = modelo.get_layer(config.CAPA_EXTRACTOR)
+        if len(modelo.inputs) == 1:
+            # Modelo nuevo (solo extractor): se compara por similitud coseno.
+            extractor = modelo
 
-        self._predictor = lambda a, b: modelo([a, b], training=False).numpy()
+            def _coseno(a, b):
+                va = extractor(a, training=False).numpy().astype("float64")
+                vb = extractor(b, training=False).numpy().astype("float64")
+                num = np.sum(va * vb, axis=1)
+                den = np.linalg.norm(va, axis=1) * np.linalg.norm(vb, axis=1)
+                cos = num / np.maximum(den, 1e-12)
+                z = np.clip((cos - config.CENTRO_COSENO) / config.ESCALA_COSENO, -50, 50)
+                return 1.0 / (1.0 + np.exp(-z))
+
+            self._predictor = _coseno
+        else:
+            # Modelo anterior (red siamesa completa).
+            extractor = modelo.get_layer(config.CAPA_EXTRACTOR)
+            self._predictor = lambda a, b: modelo([a, b], training=False).numpy()
+
         self._extractor = lambda x: extractor(x, training=False).numpy()
 
         # Igual que la app original: se redimensiona y se lee con TensorFlow.
