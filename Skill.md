@@ -227,8 +227,9 @@ F1-score
 El agente debe poder elegir umbrales de decisión **usando datos de validación**, nunca los datos de prueba.
 
 ```text
-Umbral de la salida de la red: 0,15
-Umbral de similitud coseno (aplicación): 0,90
+Red siamesa anterior — umbral de la salida de la red: 0,15
+Red siamesa anterior — umbral de similitud coseno: 0,90
+Modelo final D — umbral de similitud coseno: 0,999876 (en la app, 0.5 sobre el coseno reescalado)
 ```
 
 Procedimiento:
@@ -284,18 +285,27 @@ Análisis
 Además de evaluar pares, se mide qué tan bien funciona el sistema buscando un perro entre muchos: se registra una foto de cada perro y se busca con otra foto distinta del mismo perro.
 
 ```text
-Resultado del modelo final (100 perros):
-Primer lugar:          54 de 100
-Entre los 3 primeros:  77 de 100
-Entre los 5 primeros:  78 de 100
+Resultado del modelo final D (100 perros):
+Primer lugar:          70 de 100
+Entre los 3 primeros:  81 de 100
+Entre los 5 primeros:  85 de 100
 ```
 
-### Resultados del modelo final (2.000 pares de prueba)
+(Red siamesa anterior: 54, 77 y 78 de 100)
 
-```text
+
+### Resultados del modelo final D (pares de prueba)
+
+````text
+Accuracy 87,85 % | F1-score 87,78 %  (coseno, umbral 0,999876)
+````
+
+### Resultados de la red siamesa anterior (2.000 pares de prueba)
+
+````text
 Similitud coseno, umbral 0,90:
 Accuracy 87,55 % | Precision 89,24 % | Recall 85,40 % | F1-score 87,28 %
-```
+````
 
 ---
 
