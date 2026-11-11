@@ -739,12 +739,19 @@ Dos fotos se comparan con la similitud coseno entre sus vectores.
 El umbral se eligió en validación y recién después se midió en prueba, así que
 los números de prueba son honestos.
 
-### Comparación de configuraciones
+### Comparación de modelos: ¿cuál es mejor y cuál conviene?
 
-Se probaron cuatro configuraciones (A, B, C y D). Las tres primeras dieron
-resultados entre 74 % y 82 % en prueba, con diferencias que no eran confiables
-porque cada entrenamiento arranca con pesos distintos. La configuración D fue la
-mejor y la única que mejoró de forma clara tanto en validación como en prueba.
+| Modelo | ¿Desde cero? | Accuracy en prueba | F1 en prueba | Buscador: correcto primero (de 100) |
+|---|:---:|---:|---:|---:|
+| CNN inicial (16 perros) | Sí | 56,25 % | — | — |
+| MobileNetV2 con fine-tuning | **No** (preentrenada) | 82,15 % | 82,83 % | — |
+| Siamesa propia, umbral ajustado | Sí | 87,55 % | 87,28 % | 54 |
+| Configuraciones A, B y C (más perros, otro learning rate) | Sí | 78,6 % – 82,1 % | — | 32 – 37 |
+| **D: extractor con pérdida de trillizos (final)** | **Sí** | **87,85 %** | **87,78 %** | **70** |
+
+Las pruebas usaron distintos conjuntos de perros y de pares, así que los números no son estrictamente comparables.
+
+**Conclusión:** el modelo que más conviene es el **D**. Tiene la mejor accuracy entre los modelos propios y el mejor resultado como buscador (70 de 100 contra 54 de la siamesa), y cumple la consigna de ser una red creada y entrenada desde cero. MobileNetV2 se probó solo como comparación y no forma parte de la entrega. Las configuraciones A, B y C no mejoraron de forma confiable, porque cada entrenamiento arranca con pesos aleatorios distintos.
 
 ### Límites conocidos
 
