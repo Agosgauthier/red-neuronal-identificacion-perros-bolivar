@@ -166,6 +166,8 @@ La comparación se realiza así:
 
 Parámetros totales: 431.073.
 
+**Versión actual (modelo D):** la aplicación usa `extractor_D_trillizos.keras`, que es solo el extractor (sin cabeza de comparación), entrenado con pérdida de trillizos y comparado por similitud coseno. La estructura de arriba corresponde a la red siamesa anterior.
+
 Todos los pesos se inicializan al azar y se aprenden durante el entrenamiento. **No se utilizan pesos preentrenados.**
 
 ---
@@ -191,7 +193,17 @@ Los resultados de ese experimento no son estrictamente comparables con los del m
 
 El agente debe poder ayudar a configurar y ejecutar procesos de entrenamiento, en Google Colab con GPU.
 
-### Parámetros actuales
+### Parámetros del modelo final (D)
+
+```text
+Pérdida: trillizos (triplet loss), margen 0,3
+Tanda: 16 perros x 4 fotos = 64 imágenes
+Optimizador: Adam, learning rate 0.001
+Épocas: 30 (100 pasos por época)
+Aumento de datos: RandomFlip, RandomRotation, RandomZoom, RandomBrightness
+```
+
+### Parámetros de la red siamesa anterior
 
 ```text
 Optimizador: Adam
@@ -204,7 +216,7 @@ EarlyStopping: val_loss, paciencia 5, restaura mejores pesos
 ReduceLROnPlateau: factor 0.5, paciencia 3, mínimo 1e-6
 ```
 
-En el entrenamiento final, el proceso se detuvo en la época 14 y se conservaron los pesos de la época 9.
+En el entrenamiento de la red siamesa anterior, el proceso se detuvo en la época 14 y se conservaron los pesos de la época 9.
 
 ### Métrica principal
 
