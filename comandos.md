@@ -372,7 +372,7 @@ for umbral in np.arange(0.05, 0.96, 0.05):
 print("Mejor umbral:", mejor_umbral)
 ```
 
-Resultado del modelo final: **0,15**.
+Resultado de la red siamesa anterior: **0,15**.
 
 ## Umbral de similitud coseno (el que usa la aplicación)
 
@@ -459,7 +459,7 @@ Entre los 5 primeros:  85 de 100
 
 # 💾 Guardar el Modelo
 
-## Guardar el modelo final
+## Guardar el modelo (versión anterior, red siamesa)
 
 ```python
 modelo.save(
@@ -492,7 +492,7 @@ print(
 )
 ```
 
-El modelo final pesa aproximadamente 5 MB.
+El modelo anterior pesa aproximadamente 5 MB.
 
 ---
 
