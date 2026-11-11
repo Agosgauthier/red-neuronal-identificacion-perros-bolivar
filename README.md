@@ -570,6 +570,7 @@ python -m unittest discover -s tests -p "test_*.py" -v
 
 # 📁 Estructura del Proyecto
 
+```text
 red-neuronal-identificacion-perros-bolivar/
 │
 ├── 📂 .github/workflows/
@@ -602,7 +603,8 @@ red-neuronal-identificacion-perros-bolivar/
 │   │   ├── 📄 buscador_service.py
 │   │   ├── 📄 perros_repository.py
 │   │   ├── 📄 dataset_service.py
-│   │   └── 📄 evaluacion_service.py
+│   │   ├── 📄 evaluacion_service.py
+│   │   └── 📄 entrenamiento_service.py
 │   ├── 📂 controllers/           (conecta la vista con los services)
 │   └── 📂 views/                 (interfaz Gradio, HTML y CSS)
 │
@@ -623,7 +625,7 @@ red-neuronal-identificacion-perros-bolivar/
 ├── 📄 Skill.md
 ├── 📄 requirements.txt
 └── 📄 .gitignore
-
+```
 ---
 
 # 🛠️ Requisitos Previos
