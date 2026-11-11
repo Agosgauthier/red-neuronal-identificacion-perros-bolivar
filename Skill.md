@@ -296,16 +296,16 @@ Entre los 5 primeros:  85 de 100
 
 ### Resultados del modelo final D (pares de prueba)
 
-````text
+```text
 Accuracy 87,85 % | F1-score 87,78 %  (coseno, umbral 0,999876)
-````
+```
 
 ### Resultados de la red siamesa anterior (2.000 pares de prueba)
 
-````text
+```text
 Similitud coseno, umbral 0,90:
 Accuracy 87,55 % | Precision 89,24 % | Recall 85,40 % | F1-score 87,28 %
-````
+```
 
 ---
 
@@ -365,8 +365,10 @@ Mejora aparente
 El modelo final del proyecto, usado por la aplicación, es:
 
 ```text
-model/modelo_perros_bolivar_scratch.keras
+model/extractor_D_trillizos.keras
 ```
+
+La versión anterior (`model/modelo_perros_bolivar_scratch.keras`) se conserva como comparación.
 
 Los modelos del experimento de comparación (MobileNetV2) son:
 
@@ -513,7 +515,7 @@ Archivo principal:
 main.py
 ```
 
-La aplicación carga `modelo_perros_bolivar_scratch.keras`, calcula la similitud coseno sobre la capa `extractor_128` y usa el umbral 0,90.
+La aplicación carga `extractor_D_trillizos.keras`, calcula la similitud coseno entre los vectores del extractor, la reescala con una sigmoide (`CENTRO_COSENO`, `ESCALA_COSENO`) y usa `UMBRAL_COINCIDENCIA = 0.5`.
 
 Para ejecutarla:
 
