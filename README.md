@@ -226,7 +226,7 @@ Optimizador:             Adam
 Learning rate inicial:   0.001
 Función de pérdida:      binary_crossentropy
 Batch size:              32
-Validación:              20 % del entrenamiento
+Validación:              100 perros distintos (2.000 pares)
 Épocas máximas:          40
 EarlyStopping:           monitorea val_loss, paciencia 5, restaura los mejores pesos
 ReduceLROnPlateau:       factor 0.5, paciencia 3, mínimo 1e-6
@@ -271,9 +271,10 @@ Se evaluaron los **2.000 pares de prueba** (perros que el modelo nunca vio), con
 | Métrica | Resultado |
 |---|---:|
 | **Accuracy** | **90,80 %** |
-| **Precision** | **89,24 %** |
-| **Recall** | **85,40 %** |
-| **F1-score** | **87,28 %** |
+| **Precision** | **91,21 %** |
+| **Recall** | **90,30 %** |
+| **F1-score** | **90,75 %** |
+
 
 ```text
 [[913  87]
@@ -308,14 +309,14 @@ El conjunto de prueba contiene perros que **no fueron utilizados durante el entr
 
 ## Clasificador (salida final de la red)
 
-El umbral de decisión por defecto (0,5) no era adecuado para este modelo: casi no daba falsos positivos, pero dejaba pasar más de la mitad de los pares del mismo perro. Se buscó un umbral mejor usando datos de validación.
+Con el umbral por defecto (0,5) la red ya funciona bien. Además se buscó un umbral con datos de validación (0,25, el que da el mayor F1 en validación): sube el recall, pero la accuracy en prueba baja un poco.
 
 | Métrica | Umbral 0,5 | Umbral 0,25 |
 |---|---:|---:|
 | **Accuracy** | **89,95 %** | 88,55 % |
-| **Precision** | 98,23 % | 88,20 % |
-| **Recall** | 44,50 % | **86,70 %** |
-| **F1-score** | 61,25 % | **87,44 %** |
+| **Precision** | **93,00 %** | 85,40 % |
+| **Recall** | 86,40 % | **93,00 %** |
+| **F1-score** | **89,58 %** | 89,04 % |
 
 ## Matriz de Confusión (umbral 0,25)
 
@@ -328,11 +329,11 @@ El umbral de decisión por defecto (0,5) no era adecuado para este modelo: casi 
 ### Interpretación
 
 ```text
-884 → perros diferentes correctamente clasificados
-116 → perros diferentes clasificados como mismo perro
+841 → perros diferentes correctamente clasificados
+159 → perros diferentes clasificados como mismo perro
 
-133 → pares del mismo perro clasificados como diferentes
-867 → pares del mismo perro correctamente clasificados
+70 → pares del mismo perro clasificados como diferentes
+930 → pares del mismo perro correctamente clasificados
 ```
 
 ---
@@ -420,9 +421,9 @@ Resultado final en perros nunca vistos:
 
 ```text
 Accuracy:  90,80 %
-Precision: 89,24 %
-Recall:    85,40 %
-F1-score:  87,28 %
+Precision: 91,21 %
+Recall:    90,30 %
+F1-score:  90,75 %
 ```
 
 ## Evolución del modelo desde cero
@@ -438,7 +439,7 @@ Un intento de centrar los vectores (restarles la media) empeoró el resultado (F
    ↓
 90,80 %   (CNN mejorada, similitud coseno)
    ↓
-87,85 %   (modelo D con trillizos; búsqueda: primero 54 → 70 de 100)
+87,85 %   (modelo D con trillizos; búsqueda: primero 60 → 70 de 100)
 ```
 
 ---
@@ -755,7 +756,7 @@ los números de prueba son honestos.
 
 Las pruebas usaron distintos conjuntos de perros y de pares, así que los números no son estrictamente comparables.
 
-**Conclusión:** el modelo que más conviene es el **D**. Tiene la mejor accuracy entre los modelos propios y el mejor resultado como buscador (70 de 100 contra 54 de la siamesa), y cumple la consigna de ser una red creada y entrenada desde cero. MobileNetV2 se probó solo como comparación y no forma parte de la entrega. Las configuraciones A, B y C no mejoraron de forma confiable, porque cada entrenamiento arranca con pesos aleatorios distintos.
+**Conclusión:** el modelo que más conviene es el **D**. Es el mejor como buscador, que es lo que hace la aplicación: deja al perro correcto primero en 70 de 100 consultas contra 60 de la siamesa, y también gana entre los 3 y los 5 primeros. La siamesa saca más accuracy comparando pares (90,80 % contra 87,85 %), pero esa prueba usó otros pares de perros, así que no es una comparación estricta, y con solo 100 consultas la diferencia entre 70 y 60 tampoco es enorme. Ambos modelos cumplen la consigna de ser redes creadas y entrenadas desde cero. MobileNetV2 se probó solo como comparación y no forma parte de la entrega. Las configuraciones A, B y C no mejoraron de forma confiable, porque cada entrenamiento arranca con pesos aleatorios distintos.
 
 ### Límites conocidos
 
