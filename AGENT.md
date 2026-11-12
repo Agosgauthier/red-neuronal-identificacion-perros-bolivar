@@ -67,7 +67,7 @@ Las dos imágenes pasan por la misma red. Luego se comparan:
 
 Parámetros totales: 431.073.
 
-**Versión actual (modelo D):** la aplicación usa `extractor_D_trillizos.keras`, que es solo el extractor (sin cabeza de comparación), entrenado con pérdida de trillizos y comparado por similitud coseno. La descripción de arriba corresponde a la red siamesa anterior.
+**Modelo final:** la aplicación usa `model/modelo_perros_bolivar_scratch.keras`, la red siamesa descripta arriba. El modelo D con pérdida de trillizos (`extractor_D_trillizos.keras`) es un experimento posterior y no es el modelo final.
 
 MobileNetV2 se probó únicamente como experimento de comparación en una etapa anterior del proyecto. No forma parte del modelo entregado.
 
@@ -108,16 +108,18 @@ El dataset contiene:
 - **2.723 perros**
 - **27.036 imágenes**
 
-Para la versión anterior (red siamesa) se trabajó con:
+Para la red siamesa se trabajó con:
 
 ```text
 400 perros → entrenamiento
+100 perros → validación
 100 perros → prueba
 
 8.000 pares → entrenamiento
+2.000 pares → validación
 2.000 pares → prueba
 
-Total: 10.000 pares de fotografías
+Total: 12.000 pares de fotografías
 ```
 
 Los pares están balanceados:
@@ -127,7 +129,7 @@ Los pares están balanceados:
 50 % → perros diferentes
 ```
 
-Los perros de prueba no se usan durante el entrenamiento. El 20 % de los pares de entrenamiento se reserva como validación.
+Los perros de validación y de prueba no se usan durante el entrenamiento.
 
 ---
 
@@ -135,45 +137,37 @@ Los perros de prueba no se usan durante el entrenamiento. El 20 % de los pares d
 
 El modelo final del proyecto, usado por la aplicación, es:
 
-- `model/extractor_D_trillizos.keras`: CNN propia (solo extractor), entrenada con pérdida de trillizos (margen 0,3; 16 perros x 4 fotos por tanda; Adam 0,001; 30 épocas de 100 pasos). Se compara por similitud coseno.
+- `model/modelo_perros_bolivar_scratch.keras`: red siamesa con CNN propia, creada y entrenada desde cero (431.073 parámetros). Devuelve la probabilidad de que dos fotos sean del mismo perro.
 
 ```text
-Umbral de coseno: 0,999876 (elegido en validación, F1 de validación 0,9064)
-Pares de prueba:  Accuracy 87,85 % | F1-score 87,78 %
-Buscador (100 perros): primero 70 | entre los 3 primeros 81 | entre los 5 primeros 85 (de 100)
-```
+Umbral de la app: 0,25 (elegido con datos de validación, F1 de validación 0,8915)
 
-La aplicación reescala el coseno con una sigmoide (`CENTRO_COSENO` y `ESCALA_COSENO` en `src/config.py`), por eso `UMBRAL_COINCIDENCIA = 0.5`.
-
-Versión anterior, conservada como comparación: `model/modelo_perros_bolivar_scratch.keras`, red siamesa con CNN propia, 431.073 parámetros.
-
-Resultados de la versión anterior sobre 2.000 pares de prueba (perros no vistos):
-
-```text
-Con similitud coseno (umbral 0,90, el que usaba la aplicación antes del modelo D):
-Accuracy:  90,80 %
-Precision: 91,21 %
-Recall:    90,30 %
-F1-score:  90,75 %
-
-Con la salida de la red (umbral 0,25):
+Sobre 2.000 pares de prueba (perros no vistos):
 Accuracy:  88,55 %
 Precision: 85,40 %
 Recall:    93,00 %
 F1-score:  89,04 %
+
+Matriz de confusión:
+[[841 159]
+ [ 70 930]]
 ```
 
-Como buscador (versión anterior; 100 perros del test, una foto registrada y otra distinta para buscar):
+La aplicación usa la salida de la red con `UMBRAL_COINCIDENCIA = 0.25` en `src/config.py`.
+
+Alternativas evaluadas con el mismo modelo (no son las que usa la app):
 
 ```text
-Perro correcto en primer lugar:      60 de 100
-Perro correcto entre los 3 primeros: 80 de 100
-Perro correcto entre los 5 primeros: 83 de 100
+Umbral 0,5 sobre la salida de la red:       Accuracy 89,95 % | Precision 93,00 % | Recall 86,40 % | F1-score 89,58 %
+Similitud coseno, umbral 0,90:              Accuracy 90,80 % | Precision 91,21 % | Recall 90,30 % | F1-score 90,75 %
+Buscador con similitud coseno (100 perros): primero 60 | entre los 3 primeros 80 | entre los 5 primeros 83
 ```
 
 Los umbrales (0,25 y 0,90) se eligieron con datos de validación, no con los de prueba.
 
-Modelos del experimento de comparación (MobileNetV2), que la aplicación ya no usa:
+Experimento posterior (no es el modelo final): `model/extractor_D_trillizos.keras`, extractor entrenado con pérdida de trillizos (margen 0,3; 16 perros x 4 fotos por tanda; Adam 0,001; 30 épocas de 100 pasos) y comparado por similitud coseno (umbral 0,999876, F1 de validación 0,9064). Sobre los pares de prueba: Accuracy 87,85 % | F1-score 87,78 %. Como buscador: primero 70 | entre los 3 primeros 81 | entre los 5 primeros 85 (de 100). Las constantes `CENTRO_COSENO` y `ESCALA_COSENO` de `src/config.py` solo se usan con este tipo de modelo.
+
+Modelos del experimento de comparación (MobileNetV2), que la aplicación no usa:
 
 - `experimentos/mobilenet_preentrenado/modelo_perros_bolivar_final.keras`: Accuracy 82,15 % | F1-score 82,83 %.
 - `experimentos/mobilenet_preentrenado/modelo_perros_bolivar_12000_app.keras`: Accuracy 87,81 % | F1-score 88,30 % (1.600 pares, umbral 0,76).
@@ -244,8 +238,8 @@ red-neuronal-identificacion-perros-bolivar/
 │   └── ci.yml
 │
 ├── model/
-│   ├── extractor_D_trillizos.keras   (modelo final, el que usa la app)
-│   └── modelo_perros_bolivar_scratch.keras   (versión anterior, comparación) 
+│   ├── modelo_perros_bolivar_scratch.keras   (modelo final, el que usa la app)
+│   └── extractor_D_trillizos.keras   (experimento con trillizos, comparación)
 │
 ├── experimentos/
 │   └── mobilenet_preentrenado/    (versión anterior con MobileNetV2, NO es la entrega)
@@ -362,17 +356,17 @@ No se debe asumir que una modificación mejora el modelo sin comprobarlo mediant
 El modelo entrenado que usa la aplicación debe mantenerse en:
 
 ```text
-model/extractor_D_trillizos.keras
+model/modelo_perros_bolivar_scratch.keras
 ```
 
-La aplicación (`src/config.py`) apunta a ese archivo mediante `RUTA_MODELO`. Compara por similitud coseno reescalada (`CENTRO_COSENO = 0.999876`, `ESCALA_COSENO = 0.0001`) y usa `UMBRAL_COINCIDENCIA = 0.5`, que equivale a un coseno de 0,999876.
+La aplicación (`src/config.py`) apunta a ese archivo mediante `RUTA_MODELO` y usa la salida de la red con `UMBRAL_COINCIDENCIA = 0.25`. Las constantes `CENTRO_COSENO` y `ESCALA_COSENO` solo se usan con el modelo D, que es un experimento.
 
 Cuando se genere una nueva versión del modelo, se debe:
 
 1. Comprobar que pueda guardarse correctamente.
 2. Comprobar que pueda volver a cargarse.
 3. Evaluar su rendimiento.
-4. **Recalcular el umbral de similitud** con datos de validación y actualizarlo en `src/config.py`.
+4. **Recalcular el umbral** con datos de validación y actualizarlo en `src/config.py`.
 5. Registrar los resultados.
 6. Identificar claramente la nueva versión.
 
