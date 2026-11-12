@@ -77,12 +77,13 @@ Los pares fueron balanceados para mantener una cantidad equivalente de ejemplos 
 
 ---
 
-# 📊 Experimento de la versión anterior (red siamesa)
+# 📊 Pares de imágenes (red siamesa final)
 
-Para el experimento final se seleccionaron:
+Para el modelo final se seleccionaron:
 
 ```text
 400 perros → entrenamiento
+100 perros → validación
 100 perros → prueba
 ```
 
@@ -90,28 +91,19 @@ Se generaron:
 
 ```text
 8.000 pares → entrenamiento
+2.000 pares → validación
 2.000 pares → prueba
 ```
 
-Distribución:
+Distribución (balanceada en cada conjunto):
 
 ```text
-4.000 pares de mismo perro
-4.000 pares de perros diferentes
+Entrenamiento: 4.000 pares de mismo perro y 4.000 de perros diferentes
+Validación:    1.000 pares de mismo perro y 1.000 de perros diferentes
+Prueba:        1.000 pares de mismo perro y 1.000 de perros diferentes
 ```
 
-para entrenamiento.
-
-Y:
-
-```text
-1.000 pares de mismo perro
-1.000 pares de perros diferentes
-```
-
-para prueba.
-
-Los perros utilizados en el conjunto de prueba no fueron utilizados durante el entrenamiento. Además, el 20 % de los pares de entrenamiento se reservó como validación.
+Los perros de validación y de prueba no se utilizaron durante el entrenamiento.
 
 ---
 
@@ -137,9 +129,9 @@ Los valores de los píxeles se dividieron por 255, para que queden entre 0 y 1.
 
 ---
 
-# 🧠 Arquitectura de la versión anterior (red siamesa)
+# 🧠 Arquitectura del modelo final (red siamesa)
 
-> Esta sección y las dos siguientes (extractor y comparación) describen la red siamesa anterior. El modelo actual, el D, está descripto en "Versión final — Modelo D", dentro de "Evolución del Proyecto".
+> Esta sección y las dos siguientes (extractor y comparación) describen el modelo final que usa la aplicación: `model/modelo_perros_bolivar_scratch.keras`.
 
 La arquitectura principal utilizada es una **Siamese Network** con una **CNN propia creada desde cero**.
 
@@ -229,7 +221,7 @@ Total:           431.073
 
 # ⚙️ Entrenamiento
 
-Configuración de la versión anterior (red siamesa):
+Configuración del modelo final (red siamesa):
 
 ```text
 Optimizador:           Adam
@@ -271,7 +263,7 @@ Búsqueda por similitud:   Accuracy 87,81 %   F1-score 88,30 %  (1.600 pares)
 
 Este experimento se conserva **solo como comparación**. No es la entrega, porque la consigna prohíbe redes preentrenadas. Las pruebas usaron conjuntos de perros y pares distintos, por lo que los números no son estrictamente comparables con los del modelo final.
 
-## Versión intermedia — CNN propia siamesa mejorada (scratch)
+## Versión final — CNN propia siamesa mejorada (scratch)
 
 Se construyó nuevamente una red desde cero, con 4 bloques de convolución, BatchNormalization, Dropout, aumento de datos, 8.000 pares de entrenamiento y EarlyStopping.
 
@@ -281,21 +273,18 @@ Resultados sobre los 2.000 pares de prueba (perros nunca vistos):
 Con umbral 0,5 (por defecto):
 Accuracy 89,95 % | Precision 93,00 % | Recall 86,40 % | F1-score 89,58 %
 
-
 Con umbral 0,25 (elegido con validación):
 Accuracy 88,55 % | Precision 85,40 % | Recall 93,00 % | F1-score 89,04 %
-
 ```
 
 Matriz de confusión con umbral 0,25:
 
 ```text
 [[841 159]
-
  [ 70 930]]
 ```
 
-Resultados con similitud coseno (la que usaba la aplicación antes del modelo D), umbral 0,90:
+Resultados con similitud coseno (alternativa evaluada, no es la que usa la app), umbral 0,90:
 
 ```text
 Accuracy 90,80 % | Precision 91,21 % | Recall 90,30 % | F1-score 90,75 %
@@ -321,12 +310,13 @@ Resumen de la evolución de la red desde cero:
 89,95 %  (CNN mejorada, umbral 0,5)
    ↓
 90,80 %  (CNN mejorada, similitud coseno)
-
+   ↓
+88,55 %  (CNN mejorada, umbral 0,25 elegido en validación: modelo final de la app)
 ```
 
-## Versión final — Modelo D (extractor con pérdida de trillizos)
+## Experimento posterior — Modelo D (extractor con pérdida de trillizos)
 
-Archivo: `model/extractor_D_trillizos.keras`. CNN propia, creada y entrenada desde cero (sin redes preentrenadas). Es solo el extractor: convierte cada foto en un vector de 128 números y dos fotos se comparan con la similitud coseno. No tiene cabeza de comparación ni sigmoide.
+Archivo: `model/extractor_D_trillizos.keras`. No es el modelo final ni el que usa la app. CNN propia, creada y entrenada desde cero (sin redes preentrenadas). Es solo el extractor: convierte cada foto en un vector de 128 números y dos fotos se comparan con la similitud coseno. No tiene cabeza de comparación ni sigmoide.
 
 ```text
 Entrenamiento:       pérdida de trillizos (triplet loss), margen 0,3
@@ -337,7 +327,7 @@ Aumento de datos:    RandomFlip, RandomRotation, RandomZoom, RandomBrightness
 Umbral de coseno:    0,999876 (elegido en validación, F1 de validación 0,9064)
 ```
 
-En la app, el coseno se reescala con una sigmoide centrada en 0,999876 (`CENTRO_COSENO` y `ESCALA_COSENO` en `src/config.py`). Por eso `UMBRAL_COINCIDENCIA = 0.5` equivale a ese coseno. El reescalado no cambia el orden de los resultados.
+Si este modelo se configura en `RUTA_MODELO`, la app reescala el coseno con una sigmoide centrada en 0,999876 (`CENTRO_COSENO` y `ESCALA_COSENO` en `src/config.py`). Esas constantes solo se usan con este tipo de modelo y no afectan a la red siamesa.
 
 Resultados con perros que el modelo nunca vio:
 
@@ -346,11 +336,11 @@ Pares de prueba:       Accuracy 87,85 % | F1-score 87,78 %
 Buscador (100 perros): primero 70 de 100 | entre los 3 primeros 81 de 100 | entre los 5 primeros 85 de 100
 ```
 
-Comparado con el modelo anterior, la accuracy es parecida, pero como buscador mejora de 54 a 70 de 100 en primer lugar.
+Comparado con la red siamesa final, tiene menos accuracy en pares (87,85 % contra 88,55 % con el umbral de la app) y es mejor como buscador en una prueba de 100 consultas (70 contra 60 de 100 en primer lugar). Se eligió la red siamesa como modelo final porque tiene mejor accuracy y F1, métricas completas y un entrenamiento más estable.
 
 Otros intentos:
 
-- Las configuraciones A, B y C (más perros y distinto learning rate) dieron entre 78,6 % y 82,1 % en prueba y entre 32 y 37 de 100 en primer lugar, peor que el modelo anterior.
+- Las configuraciones A, B y C (más perros y distinto learning rate) dieron entre 78,6 % y 82,1 % en prueba y entre 32 y 37 de 100 en primer lugar, peor que la red siamesa.
 - Centrar los vectores (restarles la media) empeoró el resultado (F1 de validación 0,73; 48 de 100 en primer lugar) y se descartó.
 
 Límite conocido: durante el entrenamiento, la pérdida de trillizos se estabilizó cerca de 0,30, que es el valor del margen, y las similitudes quedan entre 0,9988 y 0,99999.
@@ -362,12 +352,12 @@ Límite conocido: durante el entrenamiento, la pérdida de trillizos se estabili
 El modelo final del proyecto, utilizado por la aplicación:
 
 ```text
-model/extractor_D_trillizos.keras
+model/modelo_perros_bolivar_scratch.keras
 ```
 
 Tamaño aproximado: 5 MB.
 
-Versión anterior (red siamesa), conservada como comparación: `model/modelo_perros_bolivar_scratch.keras`.
+Experimento posterior (extractor con pérdida de trillizos), conservado como comparación: `model/extractor_D_trillizos.keras`.
 
 Modelos del experimento de comparación (MobileNetV2), que ya no usa la aplicación:
 
@@ -423,8 +413,8 @@ red-neuronal-identificacion-perros-bolivar/
 │   └── ci.yml
 │
 ├── model/
-│   ├── extractor_D_trillizos.keras   (modelo final, el que usa la app)
-│   └── modelo_perros_bolivar_scratch.keras   (versión anterior, comparación)
+│   ├── modelo_perros_bolivar_scratch.keras   (modelo final, el que usa la app)
+│   └── extractor_D_trillizos.keras   (experimento con trillizos, comparación)
 │
 ├── experimentos/
 │   └── mobilenet_preentrenado/    (versión anterior con MobileNetV2, NO es la entrega)
@@ -481,11 +471,10 @@ El agente debe recordar que:
 
 - El objetivo principal es comparar dos imágenes de perros.
 - **No se deben utilizar redes preentrenadas** (como MobileNetV2) en el modelo entregado.
-- El modelo actual es una CNN propia creada desde cero, entrenada con pérdida de trillizos. La versión anterior era una red Siamese.
-- El modelo final es `extractor_D_trillizos.keras` (solo extractor, entrenado con pérdida de trillizos). `modelo_perros_bolivar_scratch.keras` es la versión anterior, conservada como comparación.
-- La aplicación busca coincidencias con similitud coseno entre los vectores del extractor. El coseno se reescala con una sigmoide (`CENTRO_COSENO = 0.999876`, `ESCALA_COSENO = 0.0001`) y el umbral de la app es `UMBRAL_COINCIDENCIA = 0.5`, que equivale a un coseno de 0,999876.
-- Resultado del modelo final: 87,85 % de accuracy y 87,78 % de F1 sobre los pares de prueba; como buscador, el perro correcto queda primero en 70 de 100 y entre los 5 primeros en 85 de 100.
-- Los umbrales se eligieron con datos de validación, no con los de prueba (versión anterior: 0,25 y 0,90; modelo D: 0,999876).
+- El modelo final es `modelo_perros_bolivar_scratch.keras`: una red siamesa con CNN propia, creada desde cero. `extractor_D_trillizos.keras` (entrenado con pérdida de trillizos) es un experimento posterior, conservado como comparación.
+- La aplicación usa la salida de la red (probabilidad de "mismo perro") y el umbral `UMBRAL_COINCIDENCIA = 0.25` de `src/config.py`. `CENTRO_COSENO` y `ESCALA_COSENO` solo se usan con el modelo D.
+- Resultado del modelo final (umbral 0,25, sobre 2.000 pares de prueba): Accuracy 88,55 %, Precision 85,40 %, Recall 93,00 % y F1 89,04 %.
+- Los umbrales se eligieron con datos de validación, no con los de prueba (modelo final: 0,25; alternativa con coseno: 0,90; experimento D: 0,999876).
 - Los datos de prueba deben mantenerse separados de los datos de entrenamiento.
 - No se deben inventar resultados experimentales.
 - Cada nueva mejora debe ser evaluada antes de considerarse definitiva.
@@ -551,7 +540,7 @@ El proyecto cuenta actualmente con:
 ```text
 ✅ Dataset YT-BB-Dog seleccionado y preparado
 
-✅ Pares de imágenes generados (8.000 de entrenamiento y 2.000 de prueba)
+✅ Pares de imágenes generados (8.000 de entrenamiento, 2.000 de validación y 2.000 de prueba)
 
 ✅ CNN inicial entrenada
 
@@ -563,7 +552,7 @@ El proyecto cuenta actualmente con:
 
 ✅ Modelo evaluado como clasificador y como buscador
 
-✅ Modelo final exportado (extractor_D_trillizos.keras)
+✅ Modelo final exportado (modelo_perros_bolivar_scratch.keras)
 
 ✅ Aplicación Gradio conectada al modelo final
 
@@ -594,30 +583,31 @@ El proyecto se encuentra en una etapa funcional de desarrollo, con el modelo int
 
 Modelo final (entregado):
 
-- `extractor_D_trillizos.keras`: CNN propia con pérdida de trillizos, usada por la aplicación.
+- `modelo_perros_bolivar_scratch.keras`: red siamesa con CNN propia, usada por la aplicación.
+  Umbral 0,25 (elegido en validación, F1 de validación 0,8915). Sobre 2.000 pares de prueba:
+  Accuracy 88,55 % | Precision 85,40 % | Recall 93,00 % | F1-score 89,04 %
+  Con umbral 0,5: Accuracy 89,95 % | Precision 93,00 % | Recall 86,40 % | F1-score 89,58 %
+  Con similitud coseno y umbral 0,90: Accuracy 90,80 % | Precision 91,21 % | Recall 90,30 % | F1-score 90,75 %
+  Como buscador con 100 perros (similitud coseno): primero 60/100 | entre los 3 primeros 80/100 | entre los 5 primeros 83/100.
+
+Experimento posterior (comparación):
+
+- `extractor_D_trillizos.keras`: CNN propia con pérdida de trillizos.
   Umbral de coseno 0,999876 (F1 de validación 0,9064). Pares de prueba: Accuracy 87,85 % | F1-score 87,78 %.
   Como buscador con 100 perros: primero 70/100 | entre los 3 primeros 81/100 | entre los 5 primeros 85/100.
-
-Versión anterior (comparación):
-
-- `modelo_perros_bolivar_scratch.keras`: red siamesa con CNN propia.
-  Sobre 2.000 pares de prueba con similitud coseno y umbral 0,90:
-  Accuracy 90,80 % | Precision 91,21 % | Recall 90,30 % | F1-score 90,75 %
-
-  Como buscador con 100 perros: primero 60/100 | entre los 3 primeros 80/100 | entre los 5 primeros 83/100.
 
 Modelos de comparación (MobileNetV2, no usados por la aplicación):
 
 - `modelo_perros_bolivar_final.keras`: Accuracy 82,15 % | F1-score 82,83 %
 - `modelo_perros_bolivar_12000_app.keras`: Accuracy 87,81 % | F1-score 88,30 % (1.600 pares, umbral 0,76)
 
-Umbral de coincidencia en la aplicación: 0.5 sobre el coseno reescalado (equivale a un coseno de 0,999876).
+Umbral de coincidencia en la aplicación: 0.25 sobre la probabilidad que devuelve la red.
 
 Limitaciones conocidas:
 
 - A veces puntúan alto perros distintos con colores parecidos.
 - Las fotos del dataset de un mismo perro se parecen mucho entre sí; con fotos reales de Bolívar el rendimiento podría ser menor.
 - Los vectores de las fotos candidatas se guardan en caché mientras la aplicación está abierta, pero no hay un índice persistente: con miles de fotos la primera búsqueda tardaría mucho.
-- Con pocas fotos en la galería, los puntajes de perros distintos quedan muy juntos (en pruebas manuales, entre 92 % y 99 %) y el perro correcto no siempre queda primero.
+- Con el umbral de 0,25 se prioriza el recall: perros distintos pueden aparecer como posible coincidencia con puntajes bajos (en pruebas manuales, entre 34 % y 50 %). Los perros que se parecen suben a 90 % o más.
 
-La línea base actual para próximas mejoras es el modelo D (87,85 % en pares y 70 % de acierto en primer lugar).
+La línea base actual para próximas mejoras es la red siamesa scratch con umbral 0,25 (88,55 % de accuracy y 89,04 % de F1 en pares de prueba).

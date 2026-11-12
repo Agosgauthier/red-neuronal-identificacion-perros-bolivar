@@ -211,16 +211,18 @@ Labels:
 0 → perros diferentes
 ```
 
-Configuración del experimento final:
+Configuración del modelo final:
 
 ```text
 400 perros → entrenamiento
+100 perros → validación
 100 perros → prueba
 
 8.000 pares → entrenamiento (4.000 mismo perro + 4.000 distintos)
+2.000 pares → validación (1.000 mismo perro + 1.000 distintos)
 2.000 pares → prueba (1.000 mismo perro + 1.000 distintos)
 
-Total: 10.000 pares
+Total: 12.000 pares
 ```
 
 Se generan con 10 pares del mismo perro por cada perro seleccionado y la misma cantidad de pares de perros distintos.
@@ -229,6 +231,7 @@ Se generan con 10 pares del mismo perro por cada perro seleccionado y la misma c
 
 ```text
 pares/pares_train.csv
+pares/pares_val.csv
 pares/pares_test.csv
 ```
 
@@ -360,7 +363,7 @@ Los umbrales se eligen con **datos de validación** (2.000 pares de otros 100 pe
 ## Umbral de la salida de la red
 
 ```python
-X1_val, X2_val, y_val = X1_train[6400:], X2_train[6400:], y_train[6400:]
+# X1_val, X2_val, y_val: pares de validación (100 perros distintos, pares/pares_val.csv)
 pred_val = modelo.predict([X1_val, X2_val]).ravel()
 
 mejor_umbral, mejor_f1 = 0.5, 0
@@ -372,9 +375,9 @@ for umbral in np.arange(0.05, 0.96, 0.05):
 print("Mejor umbral:", mejor_umbral)
 ```
 
-Resultado de la red siamesa anterior: **0,25**.
+Resultado con la red siamesa final: **0,25** (es el umbral de la aplicación).
 
-## Umbral de similitud coseno (el que usa la aplicación)
+## Umbral de similitud coseno (alternativa evaluada)
 
 ```python
 def similitud_coseno(a, b):
@@ -396,9 +399,9 @@ for umbral in np.arange(0.30, 1.00, 0.01):
 print("Mejor umbral de similitud:", mejor_umbral)
 ```
 
-Resultado de la red siamesa anterior: **0,90**.
+Resultado con la red siamesa final: **0,90** (alternativa, no es el que usa la aplicación).
 
-Para el **modelo final (D)**, el umbral de coseno elegido en validación fue **0,999876** (F1 de validación 0,9064). La app reescala el coseno con una sigmoide, así que en `src/config.py` queda:
+Para el **experimento D**, el umbral de coseno elegido en validación fue **0,999876** (F1 de validación 0,9064). Si ese modelo se configura en la app, hay que reescalar el coseno con una sigmoide, y en `src/config.py` queda:
 
 ```python
 CENTRO_COSENO = 0.999876
@@ -406,11 +409,11 @@ ESCALA_COSENO = 0.0001
 UMBRAL_COINCIDENCIA = 0.5   # equivale a un coseno de 0,999876
 ```
 
-**Si se entrena un modelo nuevo, hay que volver a calcular este umbral.**
+Con el modelo final (red siamesa), la app usa `UMBRAL_COINCIDENCIA = 0.25` sobre la salida de la red y no usa `CENTRO_COSENO` ni `ESCALA_COSENO`.
 
 ---
 
-# 🏆 Modelo Final (D): entrenar, guardar y cargar
+# 🔬 Experimento D: entrenar, guardar y cargar
 
 El entrenamiento se hace en Google Colab (notebook `notebooks/red_desde_cero_perros.ipynb`).
 
@@ -423,7 +426,7 @@ extractor.fit(dataset_tf, steps_per_epoch=100, epochs=30)
 extractor.save("extractor_D_trillizos.keras")
 ```
 
-Copiar el archivo descargado a `model/extractor_D_trillizos.keras` y ejecutar la app:
+Copiar el archivo descargado a `model/extractor_D_trillizos.keras`. Es un experimento: la app usa la red siamesa. Para probarlo habría que cambiar `RUTA_MODELO` en `src/config.py` y usar los valores de coseno de arriba. Después se ejecuta la app:
 
 ```bash
 python main.py
@@ -445,7 +448,7 @@ def normalizar(m):
 similitudes = normalizar(consultas) @ normalizar(galeria).T
 ```
 
-Resultado del modelo final (D) con 100 perros del conjunto de prueba:
+Resultado del experimento D con 100 perros del conjunto de prueba:
 
 ```text
 Primer lugar:          70 de 100
@@ -453,13 +456,13 @@ Entre los 3 primeros:  81 de 100
 Entre los 5 primeros:  85 de 100
 ```
 
-(Red siamesa anterior: 60, 80 y 83 de 100.)
+(Red siamesa final, la que usa la app: 60, 80 y 83 de 100.)
 
 ---
 
 # 💾 Guardar el Modelo
 
-## Guardar el modelo (versión anterior, red siamesa)
+## Guardar el modelo final (red siamesa)
 
 ```python
 modelo.save(
@@ -492,7 +495,7 @@ print(
 )
 ```
 
-El modelo anterior pesa aproximadamente 5 MB.
+El modelo final pesa aproximadamente 5 MB.
 
 ---
 
@@ -565,12 +568,12 @@ Ctrl + C
 En `src/config.py`, la ruta del modelo y el umbral son:
 
 ```python
-RUTA_MODELO = BASE_DIR / "model" / "extractor_D_trillizos.keras"
+RUTA_MODELO = BASE_DIR / "model" / "modelo_perros_bolivar_scratch.keras"
 
-UMBRAL_COINCIDENCIA = 0.5      # sobre el coseno reescalado (equivale a coseno 0,999876)
-CENTRO_COSENO = 0.999876
-ESCALA_COSENO = 0.0001
+UMBRAL_COINCIDENCIA = 0.25     # sobre la probabilidad que devuelve la red
 ```
+
+`CENTRO_COSENO` y `ESCALA_COSENO` solo se usan con el modelo D (experimento).
 
 ## Ejecutar las pruebas
 
@@ -645,8 +648,8 @@ red-neuronal-identificacion-perros-bolivar/
 │   └── ci.yml
 │
 ├── model/
-│   ├── extractor_D_trillizos.keras   (modelo final, el que usa la app)
-│   └── modelo_perros_bolivar_scratch.keras   (versión anterior, comparación)
+│   ├── modelo_perros_bolivar_scratch.keras   (modelo final, el que usa la app)
+│   └── extractor_D_trillizos.keras   (experimento con trillizos, comparación)
 │
 ├── experimentos/
 │   └── mobilenet_preentrenado/    (versión anterior con MobileNetV2, NO es la entrega)
@@ -671,7 +674,8 @@ red-neuronal-identificacion-perros-bolivar/
 │   │   ├── buscador_service.py
 │   │   ├── perros_repository.py
 │   │   ├── dataset_service.py
-│   │   └── evaluacion_service.py
+│   │   ├── evaluacion_service.py
+│   │   └── entrenamiento_service.py
 │   ├── controllers/              (conecta la vista con los services)
 │   └── views/                    (interfaz Gradio, HTML y CSS)
 │
