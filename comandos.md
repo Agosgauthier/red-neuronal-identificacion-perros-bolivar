@@ -316,7 +316,7 @@ historia = modelo.fit(
 )
 ```
 
-`EarlyStopping` detiene el entrenamiento cuando el modelo deja de mejorar y conserva los mejores pesos. En el entrenamiento final se detuvo en la época 14 y se conservó la época 9.
+`EarlyStopping` detiene el entrenamiento cuando el modelo deja de mejorar y conserva los mejores pesos. En el entrenamiento final se detuvo en la época 30 y se conservó la época 25.
 
 ---
 
@@ -355,7 +355,7 @@ El umbral por defecto (0,5) no fue el mejor para este modelo, por eso se ajusta 
 
 # 🎚️ Ajuste de Umbrales
 
-Los umbrales se eligen con **datos de validación** (los últimos 1.600 pares de entrenamiento), nunca con los datos de prueba.
+Los umbrales se eligen con **datos de validación** (2.000 pares de otros 100 perros), nunca con los datos de prueba.
 
 ## Umbral de la salida de la red
 
@@ -372,7 +372,7 @@ for umbral in np.arange(0.05, 0.96, 0.05):
 print("Mejor umbral:", mejor_umbral)
 ```
 
-Resultado de la red siamesa anterior: **0,15**.
+Resultado de la red siamesa anterior: **0,25**.
 
 ## Umbral de similitud coseno (el que usa la aplicación)
 
@@ -453,7 +453,7 @@ Entre los 3 primeros:  81 de 100
 Entre los 5 primeros:  85 de 100
 ```
 
-(Red siamesa anterior: 54, 77 y 78 de 100.)
+(Red siamesa anterior: 60, 80 y 83 de 100.)
 
 ---
 
