@@ -234,7 +234,7 @@ ReduceLROnPlateau:       factor 0.5, paciencia 3, mínimo 1e-6
 
 ## Resultado del entrenamiento
 
-El entrenamiento se detuvo automáticamente en la época 14 (EarlyStopping). Se conservaron los pesos de la época 9, con 75,94 % de accuracy de validación.
+El entrenamiento se detuvo automáticamente en la época 30 (EarlyStopping). Se conservaron los pesos de la época 25, con 87,75 % de accuracy de validación.
 
 ---
 
@@ -254,7 +254,8 @@ Para evitar presentar como coincidencia una fotografía con una similitud demasi
 0,90 → 90 %
 ```
 
-Este valor se eligió buscando el mayor F1-score sobre datos de validación (los últimos 1.600 pares del entrenamiento), no sobre los datos de prueba.
+Este valor se eligió buscando el mayor F1-score sobre datos de validación (2.000 pares de otros 100 perros)
+, no sobre los datos de prueba.
 
 Si la mayor similitud encontrada es inferior a este valor, la aplicación informa que no se encontró una coincidencia suficientemente alta.
 
@@ -269,14 +270,14 @@ Se evaluaron los **2.000 pares de prueba** (perros que el modelo nunca vio), con
 
 | Métrica | Resultado |
 |---|---:|
-| **Accuracy** | **87,55 %** |
+| **Accuracy** | **90,80 %** |
 | **Precision** | **89,24 %** |
 | **Recall** | **85,40 %** |
 | **F1-score** | **87,28 %** |
 
 ```text
-[[897 103]
- [146 854]]
+[[913  87]
+ [ 97 903]]
 ```
 
 ## Evaluación como buscador
@@ -285,9 +286,9 @@ Además de comparar pares, se midió qué tan bien funciona el sistema como busc
 
 | Posición del perro correcto | Resultado | Al azar sería |
 |---|---:|---:|
-| Primer lugar | 54 de 100 | 1 |
-| Entre los 3 primeros | 77 de 100 | 3 |
-| Entre los 5 primeros | 78 de 100 | 5 |
+| Primer lugar | 60 de 100 | 1 |
+| Entre los 3 primeros | 80 de 100 | 3 |
+| Entre los 5 primeros | 83 de 100 | 5 |
 
 Aclaración: en el dataset, las fotografías de un mismo perro suelen ser muy parecidas entre sí, por lo que con fotografías reales de Bolívar el resultado podría ser menor.
 
@@ -309,18 +310,19 @@ El conjunto de prueba contiene perros que **no fueron utilizados durante el entr
 
 El umbral de decisión por defecto (0,5) no era adecuado para este modelo: casi no daba falsos positivos, pero dejaba pasar más de la mitad de los pares del mismo perro. Se buscó un umbral mejor usando datos de validación.
 
-| Métrica | Umbral 0,5 | Umbral 0,15 |
+| Métrica | Umbral 0,5 | Umbral 0,25 |
 |---|---:|---:|
-| **Accuracy** | 71,85 % | **87,55 %** |
+| **Accuracy** | **89,95 %** | 88,55 % |
 | **Precision** | 98,23 % | 88,20 % |
 | **Recall** | 44,50 % | **86,70 %** |
 | **F1-score** | 61,25 % | **87,44 %** |
 
-## Matriz de Confusión (umbral 0,15)
+## Matriz de Confusión (umbral 0,25)
 
 ```text
-[[884 116]
- [133 867]]
+[[841 159]
+
+ [ 70 930]]
 ```
 
 ### Interpretación
@@ -417,7 +419,7 @@ Se construyó nuevamente una red desde cero, esta vez con:
 Resultado final en perros nunca vistos:
 
 ```text
-Accuracy:  87,55 %
+Accuracy:  90,80 %
 Precision: 89,24 %
 Recall:    85,40 %
 F1-score:  87,28 %
@@ -432,9 +434,9 @@ Un intento de centrar los vectores (restarles la media) empeoró el resultado (F
 ```text
 56,25 %   (CNN con 16 perros)
    ↓
-71,85 %   (CNN mejorada, umbral 0,5)
+89,95 %   (CNN mejorada, umbral 0,5)
    ↓
-87,55 %   (CNN mejorada, umbral ajustado)
+90,80 %   (CNN mejorada, similitud coseno)
    ↓
 87,85 %   (modelo D con trillizos; búsqueda: primero 54 → 70 de 100)
 ```
@@ -747,7 +749,7 @@ los números de prueba son honestos.
 |---|:---:|---:|---:|---:|
 | CNN inicial (16 perros) | Sí | 56,25 % | — | — |
 | MobileNetV2 con fine-tuning | **No** (preentrenada) | 82,15 % | 82,83 % | — |
-| Siamesa propia, umbral ajustado | Sí | 87,55 % | 87,28 % | 54 |
+| Siamesa propia (similitud coseno) | Sí | 90,80 % | 90,75 % | 60 |
 | Configuraciones A, B y C (más perros, otro learning rate) | Sí | 78,6 % – 82,1 % | — | 32 – 37 |
 | **D: extractor con pérdida de trillizos (final)** | **Sí** | **87,85 %** | **87,78 %** | **70** |
 

@@ -151,27 +151,27 @@ Resultados de la versión anterior sobre 2.000 pares de prueba (perros no vistos
 
 ```text
 Con similitud coseno (umbral 0,90, el que usaba la aplicación antes del modelo D):
-Accuracy:  87,55 %
-Precision: 89,24 %
-Recall:    85,40 %
-F1-score:  87,28 %
+Accuracy:  90,80 %
+Precision: 91,21 %
+Recall:    90,30 %
+F1-score:  90,75 %
 
-Con la salida de la red (umbral 0,15):
-Accuracy:  87,55 %
-Precision: 88,20 %
-Recall:    86,70 %
-F1-score:  87,44 %
+Con la salida de la red (umbral 0,25):
+Accuracy:  88,55 %
+Precision: 85,40 %
+Recall:    93,00 %
+F1-score:  89,04 %
 ```
 
 Como buscador (versión anterior; 100 perros del test, una foto registrada y otra distinta para buscar):
 
 ```text
-Perro correcto en primer lugar:      54 de 100
-Perro correcto entre los 3 primeros: 77 de 100
-Perro correcto entre los 5 primeros: 78 de 100
+Perro correcto en primer lugar:      60 de 100
+Perro correcto entre los 3 primeros: 80 de 100
+Perro correcto entre los 5 primeros: 83 de 100
 ```
 
-Los umbrales (0,15 y 0,90) se eligieron con datos de validación, no con los de prueba.
+Los umbrales (0,25 y 0,90) se eligieron con datos de validación, no con los de prueba.
 
 Modelos del experimento de comparación (MobileNetV2), que la aplicación ya no usa:
 

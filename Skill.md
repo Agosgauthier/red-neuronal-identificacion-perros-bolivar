@@ -216,7 +216,7 @@ EarlyStopping: val_loss, paciencia 5, restaura mejores pesos
 ReduceLROnPlateau: factor 0.5, paciencia 3, mínimo 1e-6
 ```
 
-En el entrenamiento de la red siamesa anterior, el proceso se detuvo en la época 14 y se conservaron los pesos de la época 9.
+En el entrenamiento de la red siamesa anterior, el proceso se detuvo en la época 30 y se conservaron los pesos de la época 25.
 
 ### Métrica principal
 
@@ -239,7 +239,7 @@ F1-score
 El agente debe poder elegir umbrales de decisión **usando datos de validación**, nunca los datos de prueba.
 
 ```text
-Red siamesa anterior — umbral de la salida de la red: 0,15
+Red siamesa anterior — umbral de la salida de la red: 0,25
 Red siamesa anterior — umbral de similitud coseno: 0,90
 Modelo final D — umbral de similitud coseno: 0,999876 (en la app, 0.5 sobre el coseno reescalado)
 ```
@@ -303,7 +303,7 @@ Entre los 3 primeros:  81 de 100
 Entre los 5 primeros:  85 de 100
 ```
 
-(Red siamesa anterior: 54, 77 y 78 de 100)
+(Red siamesa anterior: 60, 80 y 83 de 100)
 
 
 ### Resultados del modelo final D (pares de prueba)
@@ -316,7 +316,8 @@ Accuracy 87,85 % | F1-score 87,78 %  (coseno, umbral 0,999876)
 
 ```text
 Similitud coseno, umbral 0,90:
-Accuracy 87,55 % | Precision 89,24 % | Recall 85,40 % | F1-score 87,28 %
+Accuracy 90,80 % | Precision 91,21 % | Recall 90,30 % | F1-score 90,75 %
+
 ```
 
 ---

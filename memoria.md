@@ -242,7 +242,7 @@ EarlyStopping:         val_loss, paciencia 5, restaura mejores pesos
 ReduceLROnPlateau:     factor 0.5, paciencia 3, mínimo 1e-6
 ```
 
-El entrenamiento se detuvo automáticamente en la época 14. Se conservaron los pesos de la época 9 (accuracy de validación 75,94 %).
+El entrenamiento se detuvo automáticamente en la época 30. Se conservaron los pesos de la época 25 (accuracy de validación 87,75 %).
 
 ---
 
@@ -279,34 +279,38 @@ Resultados sobre los 2.000 pares de prueba (perros nunca vistos):
 
 ```text
 Con umbral 0,5 (por defecto):
-Accuracy 71,85 % | Precision 98,23 % | Recall 44,50 % | F1-score 61,25 %
+Accuracy 89,95 % | Precision 93,00 % | Recall 86,40 % | F1-score 89,58 %
 
-Con umbral 0,15 (elegido con validación):
-Accuracy 87,55 % | Precision 88,20 % | Recall 86,70 % | F1-score 87,44 %
+
+Con umbral 0,25 (elegido con validación):
+Accuracy 88,55 % | Precision 85,40 % | Recall 93,00 % | F1-score 89,04 %
+
 ```
 
-Matriz de confusión con umbral 0,15:
+Matriz de confusión con umbral 0,25:
 
 ```text
-[[884 116]
- [133 867]]
+[[841 159]
+
+ [ 70 930]]
 ```
 
 Resultados con similitud coseno (la que usaba la aplicación antes del modelo D), umbral 0,90:
 
 ```text
-Accuracy 87,55 % | Precision 89,24 % | Recall 85,40 % | F1-score 87,28 %
+Accuracy 90,80 % | Precision 91,21 % | Recall 90,30 % | F1-score 90,75 %
 
-[[897 103]
- [146 854]]
+
+[[913  87]
+ [ 97 903]]
 ```
 
 Evaluación como buscador (100 perros del test, una foto registrada y otra distinta para buscar):
 
 ```text
-Perro correcto en primer lugar:     54 de 100
-Perro correcto entre los 3 primeros: 77 de 100
-Perro correcto entre los 5 primeros: 78 de 100
+Perro correcto en primer lugar:     60 de 100
+Perro correcto entre los 3 primeros: 80 de 100
+Perro correcto entre los 5 primeros: 83 de 100
 ```
 
 Resumen de la evolución de la red desde cero:
@@ -314,9 +318,10 @@ Resumen de la evolución de la red desde cero:
 ```text
 56,25 %  (CNN con 16 perros)
    ↓
-71,85 %  (CNN mejorada, umbral 0,5)
+89,95 %  (CNN mejorada, umbral 0,5)
    ↓
-87,55 %  (CNN mejorada, umbral ajustado)
+90,80 %  (CNN mejorada, similitud coseno)
+
 ```
 
 ## Versión final — Modelo D (extractor con pérdida de trillizos)
@@ -480,7 +485,7 @@ El agente debe recordar que:
 - El modelo final es `extractor_D_trillizos.keras` (solo extractor, entrenado con pérdida de trillizos). `modelo_perros_bolivar_scratch.keras` es la versión anterior, conservada como comparación.
 - La aplicación busca coincidencias con similitud coseno entre los vectores del extractor. El coseno se reescala con una sigmoide (`CENTRO_COSENO = 0.999876`, `ESCALA_COSENO = 0.0001`) y el umbral de la app es `UMBRAL_COINCIDENCIA = 0.5`, que equivale a un coseno de 0,999876.
 - Resultado del modelo final: 87,85 % de accuracy y 87,78 % de F1 sobre los pares de prueba; como buscador, el perro correcto queda primero en 70 de 100 y entre los 5 primeros en 85 de 100.
-- Los umbrales se eligieron con datos de validación, no con los de prueba (versión anterior: 0,15 y 0,90; modelo D: 0,999876).
+- Los umbrales se eligieron con datos de validación, no con los de prueba (versión anterior: 0,25 y 0,90; modelo D: 0,999876).
 - Los datos de prueba deben mantenerse separados de los datos de entrenamiento.
 - No se deben inventar resultados experimentales.
 - Cada nueva mejora debe ser evaluada antes de considerarse definitiva.
@@ -597,8 +602,9 @@ Versión anterior (comparación):
 
 - `modelo_perros_bolivar_scratch.keras`: red siamesa con CNN propia.
   Sobre 2.000 pares de prueba con similitud coseno y umbral 0,90:
-  Accuracy 87,55 % | Precision 89,24 % | Recall 85,40 % | F1-score 87,28 %
-  Como buscador con 100 perros: primero 54/100 | entre los 3 primeros 77/100 | entre los 5 primeros 78/100.
+  Accuracy 90,80 % | Precision 91,21 % | Recall 90,30 % | F1-score 90,75 %
+
+  Como buscador con 100 perros: primero 60/100 | entre los 3 primeros 80/100 | entre los 5 primeros 83/100.
 
 Modelos de comparación (MobileNetV2, no usados por la aplicación):
 
