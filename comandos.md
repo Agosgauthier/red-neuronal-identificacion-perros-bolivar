@@ -312,7 +312,7 @@ callbacks = [
 historia = modelo.fit(
     [X1_train, X2_train],
     y_train,
-    validation_split=0.2,
+    validation_data=([X1_val, X2_val], y_val),
     epochs=40,
     batch_size=32,
     callbacks=callbacks,

@@ -103,15 +103,15 @@ Labels:
 
 ```text
 400 perros → entrenamiento
+100 perros → validación
 100 perros → prueba
 
 8.000 pares → entrenamiento
+2.000 pares → validación
 2.000 pares → prueba
 
-Total: 10.000 pares
+Total: 12.000 pares
 ```
-
-Del entrenamiento, el 20 % se reserva como validación.
 
 ---
 
@@ -166,7 +166,7 @@ La comparación se realiza así:
 
 Parámetros totales: 431.073.
 
-**Versión actual (modelo D):** la aplicación usa `extractor_D_trillizos.keras`, que es solo el extractor (sin cabeza de comparación), entrenado con pérdida de trillizos y comparado por similitud coseno. La estructura de arriba corresponde a la red siamesa anterior.
+**Modelo final:** es esta red siamesa (`model/modelo_perros_bolivar_scratch.keras`), la que usa la aplicación. El archivo `extractor_D_trillizos.keras` es un experimento posterior: solo el extractor, sin cabeza de comparación, entrenado con pérdida de trillizos y comparado por similitud coseno.
 
 Todos los pesos se inicializan al azar y se aprenden durante el entrenamiento. **No se utilizan pesos preentrenados.**
 
@@ -193,7 +193,7 @@ Los resultados de ese experimento no son estrictamente comparables con los del m
 
 El agente debe poder ayudar a configurar y ejecutar procesos de entrenamiento, en Google Colab con GPU.
 
-### Parámetros del modelo final (D)
+### Parámetros del experimento D (trillizos)
 
 ```text
 Pérdida: trillizos (triplet loss), margen 0,3
@@ -203,7 +203,7 @@ Optimizador: Adam, learning rate 0.001
 Aumento de datos: RandomFlip, RandomRotation, RandomZoom, RandomBrightness
 ```
 
-### Parámetros de la red siamesa anterior
+### Parámetros del modelo final (red siamesa)
 
 ```text
 Optimizador: Adam
@@ -216,7 +216,7 @@ EarlyStopping: val_loss, paciencia 5, restaura mejores pesos
 ReduceLROnPlateau: factor 0.5, paciencia 3, mínimo 1e-6
 ```
 
-En el entrenamiento de la red siamesa anterior, el proceso se detuvo en la época 30 y se conservaron los pesos de la época 25.
+En el entrenamiento de la red siamesa final, el proceso se detuvo en la época 30 y se conservaron los pesos de la época 25.
 
 ### Métrica principal
 
@@ -239,9 +239,9 @@ F1-score
 El agente debe poder elegir umbrales de decisión **usando datos de validación**, nunca los datos de prueba.
 
 ```text
-Red siamesa anterior — umbral de la salida de la red: 0,25
-Red siamesa anterior — umbral de similitud coseno: 0,90
-Modelo final D — umbral de similitud coseno: 0,999876 (en la app, 0.5 sobre el coseno reescalado)
+Red siamesa final — umbral de la salida de la red: 0,25 (el que usa la app)
+Red siamesa final — umbral de similitud coseno: 0,90 (alternativa, no se usa en la app)
+Experimento D — umbral de similitud coseno: 0,999876 (si se usara en la app, 0.5 sobre el coseno reescalado)
 ```
 
 Procedimiento:
@@ -297,27 +297,31 @@ Análisis
 Además de evaluar pares, se mide qué tan bien funciona el sistema buscando un perro entre muchos: se registra una foto de cada perro y se busca con otra foto distinta del mismo perro.
 
 ```text
-Resultado del modelo final D (100 perros):
+Resultado del experimento D (100 perros):
 Primer lugar:          70 de 100
 Entre los 3 primeros:  81 de 100
 Entre los 5 primeros:  85 de 100
 ```
 
-(Red siamesa anterior: 60, 80 y 83 de 100)
+(Red siamesa final, la que usa la app: 60, 80 y 83 de 100)
 
-
-### Resultados del modelo final D (pares de prueba)
+### Resultados del experimento D (pares de prueba)
 
 ```text
 Accuracy 87,85 % | F1-score 87,78 %  (coseno, umbral 0,999876)
 ```
 
-### Resultados de la red siamesa anterior (2.000 pares de prueba)
+### Resultados de la red siamesa final (2.000 pares de prueba)
 
 ```text
-Similitud coseno, umbral 0,90:
-Accuracy 90,80 % | Precision 91,21 % | Recall 90,30 % | F1-score 90,75 %
+Umbral 0,25 (elegido en validación, el que usa la app):
+Accuracy 88,55 % | Precision 85,40 % | Recall 93,00 % | F1-score 89,04 %
 
+Umbral 0,5:
+Accuracy 89,95 % | Precision 93,00 % | Recall 86,40 % | F1-score 89,58 %
+
+Similitud coseno, umbral 0,90 (alternativa):
+Accuracy 90,80 % | Precision 91,21 % | Recall 90,30 % | F1-score 90,75 %
 ```
 
 ---
@@ -378,10 +382,10 @@ Mejora aparente
 El modelo final del proyecto, usado por la aplicación, es:
 
 ```text
-model/extractor_D_trillizos.keras
+model/modelo_perros_bolivar_scratch.keras
 ```
 
-La versión anterior (`model/modelo_perros_bolivar_scratch.keras`) se conserva como comparación.
+El experimento D (`model/extractor_D_trillizos.keras`) se conserva como comparación.
 
 Los modelos del experimento de comparación (MobileNetV2) son:
 
@@ -528,7 +532,7 @@ Archivo principal:
 main.py
 ```
 
-La aplicación carga `extractor_D_trillizos.keras`, calcula la similitud coseno entre los vectores del extractor, la reescala con una sigmoide (`CENTRO_COSENO`, `ESCALA_COSENO`) y usa `UMBRAL_COINCIDENCIA = 0.5`.
+La aplicación carga `modelo_perros_bolivar_scratch.keras` y usa la probabilidad que devuelve la red con `UMBRAL_COINCIDENCIA = 0.25`. `CENTRO_COSENO` y `ESCALA_COSENO` solo se usan si se configura el experimento D.
 
 Para ejecutarla:
 
