@@ -210,7 +210,7 @@ Optimizador: Adam
 Learning rate inicial: 0.001
 Pérdida: binary_crossentropy
 Batch size: 32
-Validación: 20 % del entrenamiento
+Validación: 100 perros distintos (2.000 pares)
 Épocas máximas: 40
 EarlyStopping: val_loss, paciencia 5, restaura mejores pesos
 ReduceLROnPlateau: factor 0.5, paciencia 3, mínimo 1e-6
