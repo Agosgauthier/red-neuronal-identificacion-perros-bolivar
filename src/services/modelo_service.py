@@ -46,7 +46,15 @@ class ModeloService:
         else:
             # Modelo anterior (red siamesa completa).
             extractor = modelo.get_layer(config.CAPA_EXTRACTOR)
-            self._predictor = lambda a, b: modelo([a, b], training=False).numpy()
+
+            def _coseno_siamesa(a, b):
+                va = extractor(a, training=False).numpy().astype("float64")
+                vb = extractor(b, training=False).numpy().astype("float64")
+                num = np.sum(va * vb, axis=1)
+                den = np.linalg.norm(va, axis=1) * np.linalg.norm(vb, axis=1)
+                return num / np.maximum(den, 1e-12)
+
+            self._predictor = _coseno_siamesa
 
         self._extractor = lambda x: extractor(x, training=False).numpy()
 
