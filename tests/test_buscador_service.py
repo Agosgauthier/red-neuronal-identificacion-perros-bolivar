@@ -3,20 +3,13 @@ import unittest
 from pathlib import Path
 
 import numpy as np
-from PIL import Image
 
-from src.services.buscador_service import BuscadorService, ValidacionError
+from src.repositories.perros_repository import PerrosRepository
+from src.services.buscador_service import BuscadorService
+from src.services.galeria_service import GaleriaService
 from src.services.modelo_service import ModeloService
-from src.services.perros_repository import PerrosRepository
-
-
-def predictor_falso(a, b):
-    """Probabilidad = qué parecido es el color promedio de las dos imágenes."""
-    return 1 - np.abs(a.mean(axis=(1, 2)) - b.mean(axis=(1, 2))).mean()
-
-
-def guardar_color(ruta, rgb):
-    Image.fromarray(np.full((40, 40, 3), rgb, dtype=np.uint8)).save(ruta)
+from src.services.registro_service import RegistroService
+from tests.helpers import guardar_color, predictor_falso
 
 
 class TestBuscadorService(unittest.TestCase):
@@ -27,11 +20,11 @@ class TestBuscadorService(unittest.TestCase):
         self.cand.mkdir()
         guardar_color(self.cand / "rojo.jpg", (250, 10, 10))
         guardar_color(self.cand / "azul.jpg", (10, 10, 250))
-        self.servicio = BuscadorService(
-            ModeloService(predictor=predictor_falso),
-            PerrosRepository(base / "t.db"),
-            ruta_candidatos=self.cand, ruta_encontrados=self.enc,
-            umbral=0.90, cantidad=5)
+        self.modelo = ModeloService(predictor=predictor_falso)
+        self.repo = PerrosRepository(base / "t.db")
+        self.galeria = GaleriaService(self.cand, self.enc)
+        self.servicio = BuscadorService(self.modelo, self.galeria, self.repo,
+                                        umbral=0.90, cantidad=5)
 
     def tearDown(self):
         self.tmp.cleanup()
@@ -44,37 +37,31 @@ class TestBuscadorService(unittest.TestCase):
         self.assertEqual(r.analizadas, 2)
 
     def test_sin_coincidencia_alta(self):
-        servicio = BuscadorService(
-            self.servicio.modelo, self.servicio.repositorio,
-            self.cand, self.enc, umbral=0.9999)
-        consulta = np.full((60, 60, 3), (200, 90, 40), dtype=np.uint8)
-        r = servicio.buscar(consulta)
+        servicio = BuscadorService(self.modelo, self.galeria, self.repo, umbral=0.9999)
+        r = servicio.buscar(np.full((60, 60, 3), (200, 90, 40), dtype=np.uint8))
         self.assertFalse(r.hay_coincidencia)
         self.assertEqual(r.coincidencias, [])
 
     def test_sin_candidatos(self):
-        vacio = BuscadorService(self.servicio.modelo, self.servicio.repositorio,
-                                self.cand / "no_existe", self.enc)
-        r = vacio.buscar(np.zeros((10, 10, 3), dtype=np.uint8))
+        vacia = GaleriaService(self.cand / "no_existe", self.enc)
+        servicio = BuscadorService(self.modelo, vacia, self.repo)
+        r = servicio.buscar(np.zeros((10, 10, 3), dtype=np.uint8))
         self.assertFalse(r.hay_coincidencia)
         self.assertTrue(r.mensaje)
 
-    def test_registrar_y_aparece_en_la_busqueda(self):
+    def test_comparar(self):
+        rojo = np.full((30, 30, 3), (250, 10, 10), dtype=np.uint8)
+        azul = np.full((30, 30, 3), (10, 10, 250), dtype=np.uint8)
+        self.assertTrue(self.servicio.comparar(rojo, rojo).mismo_perro)
+        self.assertFalse(self.servicio.comparar(rojo, azul).mismo_perro)
+
+    def test_perro_registrado_aparece_en_la_busqueda_con_sus_datos(self):
         foto = np.full((50, 50, 3), (10, 240, 10), dtype=np.uint8)
-        perro = self.servicio.registrar_encontrado(foto, "Plaza", "8/10/2026", "", "WhatsApp")
-        self.assertIsNotNone(perro.id)
+        perro = RegistroService(self.repo, self.enc).registrar(
+            foto, "Plaza", "8/10/2026", "", "WhatsApp")
         r = self.servicio.buscar(foto)
         self.assertEqual(r.coincidencias[0].ruta.name, perro.imagen)
         self.assertEqual(r.coincidencias[0].datos.zona, "Plaza")
-
-    def test_registrar_valida_campos(self):
-        foto = np.zeros((20, 20, 3), dtype=np.uint8)
-        with self.assertRaises(ValidacionError):
-            self.servicio.registrar_encontrado(None, "x", "y", "", "z")
-        with self.assertRaises(ValidacionError):
-            self.servicio.registrar_encontrado(foto, " ", "y", "", "z")
-        with self.assertRaises(ValidacionError):
-            self.servicio.registrar_encontrado(foto, "x", "y", "", "")
 
 
 if __name__ == "__main__":

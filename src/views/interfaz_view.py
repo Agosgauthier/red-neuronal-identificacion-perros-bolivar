@@ -1,6 +1,9 @@
 """Vista (la V de MVC): arma la interfaz Gradio. Sin lógica de negocio."""
-from src.views import renderizado
+from src.controllers.buscador_controller import BuscadorController
+from src.controllers.registro_controller import RegistroController
+from src.domain.errores import ErrorRegistro, ValidacionError
 from src.views.estilos import CSS
+from src.views.resultados_view import ResultadosView
 
 ENCABEZADO = """
 <header class="custom-header"><div class="header-inner">
@@ -45,12 +48,36 @@ PIE = """
 &nbsp;•&nbsp; <strong>Reencontrá</strong><br>Proyecto académico de Redes Neuronales</div>
 """
 
-
 class InterfazView:
-    def __init__(self, controlador, imagen_decorativa=""):
-        self.controlador = controlador
-        self.imagen_decorativa = imagen_decorativa
+    def __init__(self, buscador: BuscadorController, registro: RegistroController,
+                 resultados: ResultadosView):
+        self.buscador = buscador
+        self.registro = registro
+        self.resultados = resultados
+        foto = buscador.foto_decorativa()
+        self.imagen_decorativa = resultados.imagen_a_data_uri(foto) if foto else ""
 
+    # ---------- manejadores de eventos: llaman al controller y dibujan ----------
+    def _al_buscar(self, imagen_perdido):
+        """Devuelve (html_resumen, html_tarjetas)."""
+        try:
+            resultado = self.buscador.buscar(imagen_perdido)
+        except ValidacionError as error:
+            return self.resultados.aviso(str(error)), self.resultados.estado_vacio()
+        return (self.resultados.resumen(resultado),
+                self.resultados.tarjetas(resultado.coincidencias, self.buscador.umbral))
+
+    def _al_registrar(self, imagen, zona, fecha, descripcion, contacto) -> str:
+        try:
+            self.registro.registrar(imagen, zona, fecha, descripcion, contacto)
+        except ValidacionError as error:
+            return f"⚠️ {error}"
+        except ErrorRegistro:
+            return "❌ No se pudieron guardar los datos del perro. Intentá nuevamente."
+        return ("✅ Perro registrado correctamente.\n\n"
+                "La fotografía ya forma parte de la base de búsqueda.")
+
+    # ---------- armado de la pantalla ----------
     def _hero(self) -> str:
         return f"""
         <div class="dog-preview">
@@ -85,7 +112,7 @@ class InterfazView:
                     resumen = gr.HTML(
                         '<div class="result-message">Cargá una fotografía para comenzar la búsqueda.</div>',
                         elem_id="result-summary")
-                    tarjetas = gr.HTML(renderizado.estado_vacio(), elem_id="candidate-results")
+                    tarjetas = gr.HTML(self.resultados.estado_vacio(), elem_id="candidate-results")
                     gr.HTML(NOTA)
 
                 with gr.Group(elem_classes="results-panel"):
@@ -105,8 +132,8 @@ class InterfazView:
 
                 gr.HTML(PIE)
 
-            boton_buscar.click(self.controlador.buscar, inputs=perdido, outputs=[resumen, tarjetas])
-            boton_registrar.click(self.controlador.registrar,
+            boton_buscar.click(self._al_buscar, inputs=perdido, outputs=[resumen, tarjetas])
+            boton_registrar.click(self._al_registrar,
                                   inputs=[foto, zona, fecha, descripcion, contacto],
                                   outputs=resultado)
         return demo

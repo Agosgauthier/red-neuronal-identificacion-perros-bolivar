@@ -2,8 +2,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from src.models.perro import PerroEncontrado
-from src.services.perros_repository import PerrosRepository
+from src.domain.perro_encontrado import PerroEncontrado
+from src.repositories.perros_repository import PerrosRepository
 
 
 class TestPerrosRepository(unittest.TestCase):

@@ -7,7 +7,7 @@ import numpy as np
 from PIL import Image
 
 from src import config
-
+from src.services.capas_personalizadas import CapasPersonalizadas
 
 class ModeloService:
     def __init__(self, predictor=None, extractor=None, tamano=config.TAMANO_IMAGEN):
@@ -23,14 +23,9 @@ class ModeloService:
     def cargar_desde_archivo(self, ruta=config.RUTA_MODELO):
         import tensorflow as tf
 
-        @tf.keras.utils.register_keras_serializable(package="Perros")
-        class AbsDifference(tf.keras.layers.Layer):
-            def call(self, inputs):
-                return tf.abs(inputs[0] - inputs[1])
-
         modelo = tf.keras.models.load_model(
             ruta,
-            custom_objects={"AbsDifference": AbsDifference},
+            custom_objects={"AbsDifference": CapasPersonalizadas.abs_difference()},
             safe_mode=False,
             compile=False,
         )
