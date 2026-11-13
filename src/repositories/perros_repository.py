@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Optional
 
 from src import config
-from src.models.perro import PerroEncontrado
+from src.domain.perro_encontrado import PerroEncontrado
 
 _CAMPOS = "id, imagen, zona, fecha, descripcion, contacto, fecha_registro"
 

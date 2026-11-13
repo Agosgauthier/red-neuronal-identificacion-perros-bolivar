@@ -5,8 +5,8 @@ Uso: python -m scripts.migrar_json_a_sqlite
 import json
 
 from src import config
-from src.models.perro import PerroEncontrado
-from src.services.perros_repository import PerrosRepository
+from src.domain.perro_encontrado import PerroEncontrado
+from src.repositories.perros_repository import PerrosRepository
 
 RUTA_JSON = config.RUTA_ENCONTRADOS / "datos.json"
 
