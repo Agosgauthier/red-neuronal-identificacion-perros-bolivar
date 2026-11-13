@@ -47,9 +47,15 @@ class ModeloService:
             # Modelo anterior (red siamesa completa).
             extractor = modelo.get_layer(config.CAPA_EXTRACTOR)
 
+            def _vector_con_espejo(x):
+                normal = extractor(x, training=False).numpy().astype("float64")
+                espejo = extractor(np.ascontiguousarray(np.flip(x, axis=2)),
+                                   training=False).numpy().astype("float64")
+                return (normal + espejo) / 2
+
             def _coseno_siamesa(a, b):
-                va = extractor(a, training=False).numpy().astype("float64")
-                vb = extractor(b, training=False).numpy().astype("float64")
+                va = _vector_con_espejo(a)
+                vb = _vector_con_espejo(b)
                 num = np.sum(va * vb, axis=1)
                 den = np.linalg.norm(va, axis=1) * np.linalg.norm(vb, axis=1)
                 return num / np.maximum(den, 1e-12)
