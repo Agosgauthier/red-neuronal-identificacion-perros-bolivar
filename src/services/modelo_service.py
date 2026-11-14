@@ -7,7 +7,7 @@ import numpy as np
 from PIL import Image
 
 from src import config
-
+from src.services.capas_personalizadas import CapasPersonalizadas
 
 class ModeloService:
     def __init__(self, predictor=None, extractor=None, tamano=config.TAMANO_IMAGEN):
@@ -23,14 +23,9 @@ class ModeloService:
     def cargar_desde_archivo(self, ruta=config.RUTA_MODELO):
         import tensorflow as tf
 
-        @tf.keras.utils.register_keras_serializable(package="Perros")
-        class AbsDifference(tf.keras.layers.Layer):
-            def call(self, inputs):
-                return tf.abs(inputs[0] - inputs[1])
-
         modelo = tf.keras.models.load_model(
             ruta,
-            custom_objects={"AbsDifference": AbsDifference},
+            custom_objects={"AbsDifference": CapasPersonalizadas.abs_difference()},
             safe_mode=False,
             compile=False,
         )
@@ -51,7 +46,21 @@ class ModeloService:
         else:
             # Modelo anterior (red siamesa completa).
             extractor = modelo.get_layer(config.CAPA_EXTRACTOR)
-            self._predictor = lambda a, b: modelo([a, b], training=False).numpy()
+
+            def _vector_con_espejo(x):
+                normal = extractor(x, training=False).numpy().astype("float64")
+                espejo = extractor(np.ascontiguousarray(np.flip(x, axis=2)),
+                                   training=False).numpy().astype("float64")
+                return (normal + espejo) / 2
+
+            def _coseno_siamesa(a, b):
+                va = _vector_con_espejo(a)
+                vb = _vector_con_espejo(b)
+                num = np.sum(va * vb, axis=1)
+                den = np.linalg.norm(va, axis=1) * np.linalg.norm(vb, axis=1)
+                return num / np.maximum(den, 1e-12)
+
+            self._predictor = _coseno_siamesa
 
         self._extractor = lambda x: extractor(x, training=False).numpy()
 
