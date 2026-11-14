@@ -31,5 +31,5 @@ class ConsolaView:
               + " | ".join(f"entre los {k} primeros {v}" for k, v in r.ranking.aciertos.items()))
         print(f"\nModelo guardado en {r.ruta_modelo} ({r.tamano_mb} MB)")
         print("\nSi este modelo reemplaza al de la app, copiarlo a model/ y poner en src/config.py:")
-        print(f"  UMBRAL_COINCIDENCIA = {r.umbral_red:.2f}   "
-              f"# F1 de validación {r.f1_validacion_red:.4f}")
+        print(f"  UMBRAL_COINCIDENCIA = {r.umbral_coseno:.2f}   "
+              f"# F1 de validación (coseno) {r.f1_validacion_coseno:.4f}")

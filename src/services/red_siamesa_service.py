@@ -1,20 +1,26 @@
 """RedSiamesaService: el servicio del modelo. Construye, entrena, prueba y guarda la red siamesa.
 
 Reemplaza al notebook: toda la lógica de la red vive acá, en una clase.
+La red se entrena desde cero: todos los pesos parten de valores aleatorios.
 """
 from pathlib import Path
 
 import numpy as np
 
 from src.domain.configuracion_entrenamiento import ConfiguracionEntrenamiento
+from src.services.aumento_service import AumentoService
 from src.services.capas_personalizadas import CapasPersonalizadas
 from src.services.extractor_service import ExtractorService
+from src.services.lotes_service import LotesService
 
 
 class RedSiamesaService:
-    def __init__(self, config: ConfiguracionEntrenamiento, extractor_service: ExtractorService = None):
+    def __init__(self, config: ConfiguracionEntrenamiento,
+                 extractor_service: ExtractorService = None,
+                 lotes: LotesService = None):
         self.config = config
         self.extractor_service = extractor_service or ExtractorService(config.tamano)
+        self.lotes = lotes or LotesService(AumentoService(), config.semilla)
         self.extractor = None
         self.modelo = None
         self.historia = None
@@ -47,6 +53,7 @@ class RedSiamesaService:
         import tensorflow as tf
 
         c = self.config
+        t = c.tamano
         callbacks = [
             tf.keras.callbacks.EarlyStopping(
                 monitor="val_loss", patience=c.paciencia_early_stopping,
@@ -55,10 +62,18 @@ class RedSiamesaService:
                 monitor="val_loss", factor=c.factor_reduce_lr,
                 patience=c.paciencia_reduce_lr, min_lr=c.lr_minimo),
         ]
+        firma = ({"imagen_1": tf.TensorSpec((None, t, t, 3), tf.float32),
+                  "imagen_2": tf.TensorSpec((None, t, t, 3), tf.float32)},
+                 tf.TensorSpec((None,), tf.float32))
+        datos = tf.data.Dataset.from_generator(
+            lambda: self.lotes.generar(x1, x2, y, c.batch_size),
+            output_signature=firma,
+        ).prefetch(2)
         self.historia = self.modelo.fit(
-            [x1, x2], y,
+            datos,
+            steps_per_epoch=self.lotes.cantidad_de_lotes(len(y), c.batch_size),
             validation_data=([x1_val, x2_val], y_val),
-            epochs=c.epocas, batch_size=c.batch_size, callbacks=callbacks,
+            epochs=c.epocas, callbacks=callbacks,
         )
         return self.historia
 
