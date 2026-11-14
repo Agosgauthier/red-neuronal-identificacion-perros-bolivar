@@ -167,10 +167,7 @@ Los umbrales (0,25 y 0,90) se eligieron con datos de validación, no con los de 
 
 Experimento posterior (no es el modelo final): `model/extractor_D_trillizos.keras`, extractor entrenado con pérdida de trillizos (margen 0,3; 16 perros x 4 fotos por tanda; Adam 0,001; 30 épocas de 100 pasos) y comparado por similitud coseno (umbral 0,999876, F1 de validación 0,9064). Sobre los pares de prueba: Accuracy 87,85 % | F1-score 87,78 %. Como buscador: primero 70 | entre los 3 primeros 81 | entre los 5 primeros 85 (de 100). Las constantes `CENTRO_COSENO` y `ESCALA_COSENO` de `src/config.py` solo se usan con este tipo de modelo.
 
-Modelos del experimento de comparación (MobileNetV2), que la aplicación no usa:
-
-- `experimentos/mobilenet_preentrenado/modelo_perros_bolivar_final.keras`: Accuracy 82,15 % | F1-score 82,83 %.
-- `experimentos/mobilenet_preentrenado/modelo_perros_bolivar_12000_app.keras`: Accuracy 87,81 % | F1-score 88,30 % (1.600 pares, umbral 0,76).
+Experimento de comparación (MobileNetV2 preentrenada, retirado del repositorio y conservado solo en el historial de Git): con fine-tuning llegó a Accuracy 82,15 % | F1-score 82,83 %. No forma parte de la entrega, porque el modelo entregado no usa redes preentrenadas.
 
 ---
 
@@ -204,9 +201,9 @@ Las modificaciones realizadas sobre el modelo deben ser evaluadas antes de consi
 
 ## Google Colab
 
-El entrenamiento y la evaluación de la red neuronal se realizan en **Google Colab**, con GPU (T4).
+El entrenamiento y la evaluación se ejecutan con `python entrenar.py`, que solo arranca la clase `AplicacionEntrenamiento`. Si hace falta GPU (T4), se puede correr en **Google Colab** clonando el repositorio y ejecutando ese mismo comando. No hay notebooks en el proyecto: toda la lógica está en `src/services/`.
 
-El agente debe considerar Colab como el entorno principal para ejecutar:
+El agente puede usar Colab para ejecutar:
 
 - Preparación del dataset.
 - Procesamiento de imágenes.
@@ -241,9 +238,6 @@ red-neuronal-identificacion-perros-bolivar/
 │   ├── modelo_perros_bolivar_scratch.keras   (modelo final, el que usa la app)
 │   └── extractor_D_trillizos.keras   (experimento con trillizos, comparación)
 │
-├── experimentos/
-│   └── mobilenet_preentrenado/    (versión anterior con MobileNetV2, NO es la entrega)
-│
 ├── data/
 │   ├── candidates/                (fotos candidatas de la galería)
 │   ├── found/                     (fotos de perros encontrados, no se sube a Git)
@@ -251,33 +245,24 @@ red-neuronal-identificacion-perros-bolivar/
 │   ├── processed/
 │   └── perros.db                  (base SQLite, no se sube a Git)
 │
-├── notebooks/
-│   └── red_desde_cero_perros.ipynb
-│
-├── main.py                       (solo arranca la app)
+├── main.py                       (solo arranca la app web)
+├── entrenar.py                   (solo arranca el entrenamiento)
 │
 ├── src/
 │   ├── config.py                 (rutas y umbral)
-│   ├── models/                   (clases de datos)
+│   ├── aplicacion_web.py         (arma las piezas y lanza la app)
+│   ├── aplicacion_entrenamiento.py (arma las piezas y entrena)
+│   ├── domain/                   (entidades, una clase por archivo)
+│   ├── repositories/             (acceso a la base de datos)
 │   ├── services/                 (toda la lógica, en clases)
-│   │   ├── modelo_service.py
-│   │   ├── buscador_service.py
-│   │   ├── perros_repository.py
-│   │   ├── dataset_service.py
-│   │   ├── evaluacion_service.py
-│   │   └── entrenamiento_service.py
 │   ├── controllers/              (conecta la vista con los services)
-│   └── views/                    (interfaz Gradio, HTML y CSS)
+│   └── views/                    (interfaz Gradio, consola, HTML y CSS)
 │
 ├── scripts/
+│   ├── diagnostico_ranking.py
 │   └── migrar_json_a_sqlite.py
 │
-├── tests/
-│   ├── test_modelo_service.py
-│   ├── test_buscador_service.py
-│   ├── test_repository.py
-│   ├── test_controller.py
-│   └── test_dataset_y_evaluacion.py
+├── tests/                        (pruebas unitarias)
 │
 ├── README.md
 ├── AGENT.md
@@ -287,7 +272,6 @@ red-neuronal-identificacion-perros-bolivar/
 ├── requirements.txt
 └── .gitignore
 ```
-
 ---
 
 # 🛠️ Reglas de Trabajo
@@ -410,7 +394,7 @@ El agente no debe:
 - Utilizar los datos de prueba para entrenar el modelo.
 - Utilizar los datos de prueba para elegir umbrales.
 - Incorporar redes o pesos preentrenados (como MobileNetV2) al modelo entregado.
-- Utilizar, ejecutar o modificar los archivos de `experimentos/` como parte de la entrega.
+- Poner lógica en `main.py`, en `entrenar.py` o en notebooks: la lógica va en clases dentro de `src/services/`, con el patrón modelo-vista-controlador.
 - Sobrescribir un modelo funcional sin realizar una copia o comprobar la nueva versión.
 - Eliminar documentación existente sin una razón justificada.
 - Inventar resultados de entrenamiento o evaluación.
