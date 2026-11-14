@@ -445,9 +445,6 @@ El proyecto contiene los siguientes modelos:
 - `model/extractor_D_trillizos.keras`  
   Experimento posterior: extractor entrenado con pérdida de trillizos, que compara por similitud coseno. Se conserva como comparación.
 
-- `experimentos/mobilenet_preentrenado/modelo_perros_bolivar_12000_app.keras` y `experimentos/mobilenet_preentrenado/modelo_perros_bolivar_final.keras`  
-  Modelos del experimento de comparación con MobileNetV2.
-
 Todos los modelos utilizan el formato:
 
 ```text
@@ -525,7 +522,7 @@ Los perros encontrados se registran en una base de datos **SQLite** local (`data
 | `contacto` | Medio de contacto de quien lo encontró |
 | `fecha_registro` | Fecha y hora del registro en la aplicación |
 
-La clase `PerrosRepository` (`src/services/perros_repository.py`) ofrece `registrar()`, `obtener_por_imagen()` y `listar()`. La aplicación crea la base automáticamente la primera vez que se registra un perro.
+La clase `PerrosRepository` (`src/repositories/perros_repository.py`) ofrece `registrar()`, `obtener_por_imagen()` y `listar()`. La aplicación crea la base automáticamente la primera vez que se registra un perro.
 
 La base de datos y las fotografías de `data/found/` **no se suben a GitHub** (están en el `.gitignore`), porque contienen datos de contacto de personas. Si existiera un archivo `data/found/datos.json` de una versión anterior, sus registros se pasan a SQLite con:
 
@@ -537,11 +534,9 @@ python -m scripts.migrar_json_a_sqlite
 
 # 🧪 Experimentos Previos (MobileNetV2)
 
-La carpeta `experimentos/mobilenet_preentrenado/` guarda una versión anterior del proyecto basada en **MobileNetV2 preentrenada** (transfer learning), con sus scripts, su notebook y sus modelos.
+Durante el desarrollo se probó una versión anterior del proyecto basada en **MobileNetV2 preentrenada** (transfer learning), usada únicamente como experimento de comparación.
 
-Se conserva únicamente como comparación. **No forma parte de la entrega**: el modelo entregado es una CNN propia, creada y entrenada desde cero, sin redes preentrenadas (`model/modelo_perros_bolivar_scratch.keras`, notebook `notebooks/red_desde_cero_perros.ipynb`).
-
----
+Esos archivos se retiraron del repositorio y se conservan solo en el historial de Git. **No forman parte de la entrega**: el modelo entregado es una CNN propia, creada y entrenada desde cero, sin redes preentrenadas (`model/modelo_perros_bolivar_scratch.keras`).
 
 # ▶️ Cómo Ejecutar la Aplicación
 
@@ -574,9 +569,6 @@ red-neuronal-identificacion-perros-bolivar/
 │   ├── 📄 modelo_perros_bolivar_scratch.keras  (modelo final, el que usa la app)
 │   └── 📄 extractor_D_trillizos.keras   (experimento con trillizos, comparación)
 │
-├── 📂 experimentos/
-│   └── 📂 mobilenet_preentrenado/    (versión anterior con MobileNetV2, NO es la entrega)
-│
 ├── 📂 data/
 │   ├── 📂 candidates/                (fotos candidatas de la galería)
 │   ├── 📂 found/                     (fotos de perros encontrados, no se sube a Git)
@@ -584,33 +576,56 @@ red-neuronal-identificacion-perros-bolivar/
 │   ├── 📂 processed/
 │   └── 📄 perros.db                  (base SQLite, no se sube a Git)
 │
-├── 📂 notebooks/
-│   └── 📄 red_desde_cero_perros.ipynb
-│
-├── 📄 main.py                    (solo arranca la app)
+├── 📄 main.py                    (solo arranca la app web)
+├── 📄 entrenar.py                (solo arranca el entrenamiento)
 │
 ├── 📂 src/
 │   ├── 📄 config.py              (rutas y umbral)
-│   ├── 📂 models/                (clases de datos)
+│   ├── 📄 aplicacion_web.py      (arma las piezas y lanza la app)
+│   ├── 📄 aplicacion_entrenamiento.py  (arma las piezas y entrena)
+│   ├── 📂 domain/                (entidades, una clase por archivo)
+│   │   ├── 📄 coincidencia.py
+│   │   ├── 📄 configuracion_entrenamiento.py
+│   │   ├── 📄 errores.py
+│   │   ├── 📄 metricas_evaluacion.py
+│   │   ├── 📄 perro_dataset.py
+│   │   ├── 📄 perro_encontrado.py
+│   │   ├── 📄 resultado_busqueda.py
+│   │   ├── 📄 resultado_comparacion.py
+│   │   ├── 📄 resultado_experimento.py
+│   │   └── 📄 resultado_ranking.py
+│   ├── 📂 repositories/          (acceso a la base de datos)
+│   │   └── 📄 perros_repository.py
 │   ├── 📂 services/              (toda la lógica, en clases)
-│   │   ├── 📄 modelo_service.py
+│   │   ├── 📄 aumento_service.py
 │   │   ├── 📄 buscador_service.py
-│   │   ├── 📄 perros_repository.py
+│   │   ├── 📄 capas_personalizadas.py
 │   │   ├── 📄 dataset_service.py
+│   │   ├── 📄 descarga_dataset_service.py
 │   │   ├── 📄 evaluacion_service.py
-│   │   └── 📄 entrenamiento_service.py
+│   │   ├── 📄 extractor_service.py
+│   │   ├── 📄 galeria_service.py
+│   │   ├── 📄 imagen_service.py
+│   │   ├── 📄 lotes_service.py
+│   │   ├── 📄 modelo_service.py
+│   │   ├── 📄 red_siamesa_service.py
+│   │   ├── 📄 registro_service.py
+│   │   └── 📄 trillizos_service.py
 │   ├── 📂 controllers/           (conecta la vista con los services)
-│   └── 📂 views/                 (interfaz Gradio, HTML y CSS)
+│   │   ├── 📄 buscador_controller.py
+│   │   ├── 📄 entrenamiento_controller.py
+│   │   └── 📄 registro_controller.py
+│   └── 📂 views/                 (interfaz Gradio, consola, HTML y CSS)
+│       ├── 📄 consola_view.py
+│       ├── 📄 estilos.py
+│       ├── 📄 interfaz_view.py
+│       └── 📄 resultados_view.py
 │
 ├── 📂 scripts/
+│   ├── 📄 diagnostico_ranking.py
 │   └── 📄 migrar_json_a_sqlite.py
 │
-├── 📂 tests/
-│   ├── 📄 test_modelo_service.py
-│   ├── 📄 test_buscador_service.py
-│   ├── 📄 test_repository.py
-│   ├── 📄 test_controller.py
-│   └── 📄 test_dataset_y_evaluacion.py
+├── 📂 tests/                     (pruebas unitarias de services, controllers, vistas y repository)
 │
 ├── 📄 README.md
 ├── 📄 AGENT.md
@@ -620,7 +635,6 @@ red-neuronal-identificacion-perros-bolivar/
 ├── 📄 requirements.txt
 └── 📄 .gitignore
 ```
----
 
 # 🛠️ Requisitos Previos
 
@@ -651,9 +665,14 @@ Gradio
 
 ## Entrenamiento
 
-El entrenamiento y la evaluación se realizan en **Google Colab**.
+El entrenamiento y la evaluación se ejecutan desde la raíz del proyecto con `entrenar.py`, que solo arranca la clase `AplicacionEntrenamiento`. Toda la lógica está en los services y el orden de los pasos lo dirige `EntrenamientoController`:
 
-El notebook utilizado contiene el proceso de:
+```bash
+python entrenar.py --descargar     # descarga el dataset YT-BB-Dog y entrena
+python entrenar.py --epocas 1      # prueba rápida
+```
+
+El entrenamiento se puede correr en un entorno externo como Google Colab, clonando el repositorio y ejecutando esos mismos comandos. El proceso es:
 
 ```text
 Carga del dataset

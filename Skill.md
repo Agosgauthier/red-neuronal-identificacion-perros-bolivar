@@ -176,12 +176,7 @@ Todos los pesos se inicializan al azar y se aprenden durante el entrenamiento. *
 
 En una etapa anterior del proyecto se probó **MobileNetV2** con pesos preentrenados sobre ImageNet, con y sin fine-tuning, únicamente como **comparación**.
 
-Ese experimento se conserva en:
-
-```text
-experimentos/mobilenet_preentrenado/modelo_perros_bolivar_final.keras
-experimentos/mobilenet_preentrenado/modelo_perros_bolivar_12000_app.keras
-```
+Ese experimento se retiró del repositorio y queda solo en el historial de Git.
 
 El agente **no debe usar transfer learning ni redes preentrenadas en el modelo entregado**, porque la consigna del trabajo lo prohíbe.
 
@@ -191,7 +186,7 @@ Los resultados de ese experimento no son estrictamente comparables con los del m
 
 # ⚙️ Entrenamiento
 
-El agente debe poder ayudar a configurar y ejecutar procesos de entrenamiento, en Google Colab con GPU.
+El agente debe poder ayudar a configurar y ejecutar procesos de entrenamiento con `python entrenar.py`, que solo arranca la clase `AplicacionEntrenamiento`. Si hace falta GPU, se puede correr en Google Colab clonando el repositorio.
 
 ### Parámetros del experimento D (trillizos)
 
@@ -387,12 +382,7 @@ model/modelo_perros_bolivar_scratch.keras
 
 El experimento D (`model/extractor_D_trillizos.keras`) se conserva como comparación.
 
-Los modelos del experimento de comparación (MobileNetV2) son:
-
-```text
-experimentos/mobilenet_preentrenado/modelo_perros_bolivar_final.keras
-experimentos/mobilenet_preentrenado/modelo_perros_bolivar_12000_app.keras
-```
+El experimento de comparación con MobileNetV2 se retiró del repositorio y queda solo en el historial de Git.
 
 ### Procedimiento recomendado
 
@@ -440,15 +430,9 @@ Después de guardar un modelo, el agente debe comprobar:
 
 ## Google Colab
 
-Es el entorno principal para:
+El entrenamiento y la evaluación se ejecutan con `python entrenar.py`. Colab es opcional, para usar GPU: se clona el repositorio y se ejecuta ese mismo comando. No hay notebooks en el proyecto, porque la lógica está en `src/services/`.
 
-- Entrenamiento.
-- Evaluación.
-- Ajuste de umbrales.
-- Experimentación.
-- Procesamiento de datos.
-
-Colab borra la memoria al reiniciarse, por lo que hay que volver a ejecutar las celdas de preparación (dataset, pares y modelo).
+Colab borra todo al reiniciarse, así que hay que descargar el modelo entrenado antes de cerrar la sesión.
 
 ## Visual Studio Code
 
@@ -545,11 +529,7 @@ python main.py
 Las pruebas se encuentran en:
 
 ```text
-tests/test_modelo_service.py
-tests/test_buscador_service.py
-tests/test_repository.py
-tests/test_controller.py
-tests/test_dataset_y_evaluacion.py
+tests/   (pruebas de services, controllers, vistas y repository)
 ```
 
 Para ejecutarlas:
@@ -569,7 +549,7 @@ El agente no debe:
 - Entrenar utilizando datos de prueba.
 - Elegir umbrales utilizando datos de prueba.
 - Incorporar redes o pesos preentrenados al modelo entregado.
-- Utilizar, ejecutar o modificar los archivos de `experimentos/` como parte de la entrega.
+- Poner lógica en `main.py`, en `entrenar.py` o en notebooks: la lógica va en clases dentro de `src/services/`, con el patrón modelo-vista-controlador.
 - Inventar métricas.
 - Inventar resultados de experimentos.
 - Eliminar datos sin autorización.

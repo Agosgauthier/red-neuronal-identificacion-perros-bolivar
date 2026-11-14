@@ -359,22 +359,13 @@ Tamaño aproximado: 5 MB.
 
 Experimento posterior (extractor con pérdida de trillizos), conservado como comparación: `model/extractor_D_trillizos.keras`.
 
-Modelos del experimento de comparación (MobileNetV2), que ya no usa la aplicación:
-
-```text
-experimentos/mobilenet_preentrenado/modelo_perros_bolivar_12000_app.keras
-experimentos/mobilenet_preentrenado/modelo_perros_bolivar_final.keras
-```
+El experimento de comparación con MobileNetV2 se retiró del repositorio y queda solo en el historial de Git. La aplicación no lo usa.
 
 ---
 
 # 🧪 Entorno de Ejecución
 
-El entrenamiento y la evaluación de la red neuronal se realizan en:
-
-```text
-Google Colab (GPU T4)
-```
+El entrenamiento y la evaluación se ejecutan con `python entrenar.py`, que solo arranca la clase `AplicacionEntrenamiento`. Si hace falta GPU, se puede correr en Google Colab (GPU T4) clonando el repositorio y ejecutando ese mismo comando. No hay notebooks: la lógica está en `src/services/`.
 
 Visual Studio Code se utiliza principalmente para:
 
@@ -416,9 +407,6 @@ red-neuronal-identificacion-perros-bolivar/
 │   ├── modelo_perros_bolivar_scratch.keras   (modelo final, el que usa la app)
 │   └── extractor_D_trillizos.keras   (experimento con trillizos, comparación)
 │
-├── experimentos/
-│   └── mobilenet_preentrenado/    (versión anterior con MobileNetV2, NO es la entrega)
-│
 ├── data/
 │   ├── candidates/                (fotos candidatas de la galería)
 │   ├── found/                     (fotos de perros encontrados, no se sube a Git)
@@ -426,33 +414,24 @@ red-neuronal-identificacion-perros-bolivar/
 │   ├── processed/
 │   └── perros.db                  (base SQLite, no se sube a Git)
 │
-├── notebooks/
-│   └── red_desde_cero_perros.ipynb
-│
-├── main.py                       (solo arranca la app)
+├── main.py                       (solo arranca la app web)
+├── entrenar.py                   (solo arranca el entrenamiento)
 │
 ├── src/
 │   ├── config.py                 (rutas y umbral)
-│   ├── models/                   (clases de datos)
+│   ├── aplicacion_web.py         (arma las piezas y lanza la app)
+│   ├── aplicacion_entrenamiento.py (arma las piezas y entrena)
+│   ├── domain/                   (entidades, una clase por archivo)
+│   ├── repositories/             (acceso a la base de datos)
 │   ├── services/                 (toda la lógica, en clases)
-│   │   ├── modelo_service.py
-│   │   ├── buscador_service.py
-│   │   ├── perros_repository.py
-│   │   ├── dataset_service.py
-│   │   ├── evaluacion_service.py
-│   │   └── entrenamiento_service.py
 │   ├── controllers/              (conecta la vista con los services)
-│   └── views/                    (interfaz Gradio, HTML y CSS)
+│   └── views/                    (interfaz Gradio, consola, HTML y CSS)
 │
 ├── scripts/
+│   ├── diagnostico_ranking.py
 │   └── migrar_json_a_sqlite.py
 │
-├── tests/
-│   ├── test_modelo_service.py
-│   ├── test_buscador_service.py
-│   ├── test_repository.py
-│   ├── test_controller.py
-│   └── test_dataset_y_evaluacion.py
+├── tests/                        (pruebas unitarias)
 │
 ├── README.md
 ├── AGENT.md
@@ -494,7 +473,7 @@ Nunca eliminar el modelo funcional sin comprobar previamente la nueva versión.
 
 Nunca incorporar pesos preentrenados al modelo entregado.
 
-Nunca usar ni modificar los archivos de `experimentos/` como parte de la entrega.
+Nunca poner lógica en `main.py`, en `entrenar.py` ni en notebooks: la lógica va en clases dentro de `src/services/` (patrón modelo-vista-controlador).
 
 Mantener documentados:
 
@@ -564,7 +543,9 @@ El proyecto cuenta actualmente con:
 
 ✅ Caché de vectores en la búsqueda de coincidencias
 
-✅ Experimento con MobileNetV2 archivado en experimentos/mobilenet_preentrenado/ (no es la entrega)
+✅ Experimento con MobileNetV2 retirado del repositorio (queda en el historial de Git, no es la entrega)
+
+✅ Arquitectura en capas (domain, repositories, services, controllers, views) y entrenamiento con `python entrenar.py`, sin notebooks
 
 ✅ Aplicación ejecutable con python main.py
 
@@ -596,10 +577,7 @@ Experimento posterior (comparación):
   Umbral de coseno 0,999876 (F1 de validación 0,9064). Pares de prueba: Accuracy 87,85 % | F1-score 87,78 %.
   Como buscador con 100 perros: primero 70/100 | entre los 3 primeros 81/100 | entre los 5 primeros 85/100.
 
-Modelos de comparación (MobileNetV2, no usados por la aplicación):
-
-- `modelo_perros_bolivar_final.keras`: Accuracy 82,15 % | F1-score 82,83 %
-- `modelo_perros_bolivar_12000_app.keras`: Accuracy 87,81 % | F1-score 88,30 % (1.600 pares, umbral 0,76)
+Experimento de comparación (MobileNetV2, retirado del repositorio): Accuracy 82,15 % | F1-score 82,83 % con fine-tuning. No lo usa la aplicación.
 
 Umbral de coincidencia en la aplicación: 0.25 sobre la probabilidad que devuelve la red.
 
