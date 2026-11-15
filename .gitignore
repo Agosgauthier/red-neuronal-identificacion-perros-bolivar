@@ -10,9 +10,6 @@ __pycache__/
 *$py.class
 *.so
 
-# Jupyter Notebook
-.ipynb_checkpoints/
-
 # Datos del dataset
 data/raw/*
 data/processed/*

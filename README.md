@@ -692,6 +692,8 @@ Ajuste del umbral
 Exportación del modelo
 ```
 
+La configuración por defecto de `entrenar.py` (600 perros de entrenamiento, 60 épocas máximas, aumento de datos con oclusiones) es una versión posterior a la documentada en este README. Guarda el resultado como `modelo_perros_bolivar_scratch_nuevo.keras` para no pisar el modelo final que usa la app (`modelo_perros_bolivar_scratch.keras`).
+
 ---
 
 ## Flujo de la aplicación
